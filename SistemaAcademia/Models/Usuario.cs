@@ -1,23 +1,13 @@
 using SistemaAcademia.Enum;
+
 namespace SistemaAcademia.Models;
 
-public class Usuario
+public class Usuario : Pessoa
 {
-    public Usuario(string nome, string sobrenome, string cpf, string email, string senha, CargosEnum cargo)
+    public Usuario(string nome, string cpf, DateTime dataNascimento, string email, string senha, CargosEnum cargosEnum) : base(nome, dataNascimento, cpf, email, senha)
     {
-        Nome = nome;
-        Sobrenome = sobrenome;
-        CPF = cpf;
-        Email = email;
-        Senha = senha;
-        CargoEnum = cargo;
+        CargosEnum = cargosEnum;
     }
-
-    public string Nome { get; set; }
-    public string Sobrenome { get; set; }
-    public string CPF { get; set; }
-    public string Email { get; set; }
-    public string Senha { get; set; }
-    public CargosEnum CargoEnum { get; set; }
+    public CargosEnum CargosEnum { get; private set; }
 
 }
