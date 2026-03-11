@@ -4,10 +4,11 @@ namespace SistemaAcademia.Models;
 
 public class Usuario : Pessoa
 {
-    public Usuario(string nome, string cpf, DateTime dataNascimento, string email, string senha, CargosEnum cargosEnum) : base(nome, dataNascimento, cpf, email, senha)
+    public Usuario(string nome, string cpf, string email, CargosEnum cargosEnum) : base(nome, cpf, email, cargosEnum)
     {
-        CargosEnum = cargosEnum;
+        
     }
-    public CargosEnum CargosEnum { get; private set; }
+
+        public CargosEnum CargosEnum { get; private set; }
 
 }
