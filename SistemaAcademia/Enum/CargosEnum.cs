@@ -2,7 +2,8 @@ namespace SistemaAcademia.Enum;
 
 public enum CargosEnum
 {
-    Dono = 1,
+    Admin = 1,
     Professor = 2,
     Recepcionista = 3,
+    Cliente = 4,
 }
