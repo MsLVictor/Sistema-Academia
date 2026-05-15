@@ -1,0 +1,38 @@
+@{
+    ViewData["Title"] = "Painel Recepcionista";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0">🗂️ Painel da Recepcionista</h2>
+        <p class="text-muted mb-0">Bem-vindo, @ViewData["Nome"]!</p>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div style="font-size:2rem">👤</div>
+            <h6 class="mt-2 fw-bold">Clientes</h6>
+            <p class="text-muted small">Cadastrar e editar clientes</p>
+            <a href="#" class="btn btn-sm btn-success">Acessar</a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div style="font-size:2rem">💳</div>
+            <h6 class="mt-2 fw-bold">Mensalidades</h6>
+            <p class="text-muted small">Registrar e consultar pagamentos</p>
+            <a href="#" class="btn btn-sm btn-success">Acessar</a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div style="font-size:2rem">📋</div>
+            <h6 class="mt-2 fw-bold">Check-in</h6>
+            <p class="text-muted small">Controle de entrada de alunos</p>
+            <a href="#" class="btn btn-sm btn-success">Acessar</a>
+        </div>
+    </div>
+</div>

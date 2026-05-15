@@ -1,0 +1,35 @@
+@{
+    ViewData["Title"] = "Painel Cliente";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0">Meu Painel</h2>
+        <p class="text-muted mb-0">Bem-vindo, @ViewData["Nome"]!</p>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <h6 class="mt-2 fw-bold">Mensalidades</h6>
+            <p class="text-muted small">Ver status dos pagamentos e vencimentos</p>
+            <a href="#" class="btn btn-sm btn-info text-white">Acessar</a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <h6 class="mt-2 fw-bold">Meus Treinos</h6>
+            <p class="text-muted small">Ver treinos cadastrados pelo instrutor</p>
+            <a href="#" class="btn btn-sm btn-info text-white">Acessar</a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <h6 class="mt-2 fw-bold">Validade</h6>
+            <p class="text-muted small">Verificar até quando pode treinar</p>
+            <a href="#" class="btn btn-sm btn-info text-white">Acessar</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,48 @@
+@{
+    ViewData["Title"] = "Painel";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="text-center py-4">
+    <div style="font-size: 3rem; margin-bottom: 1rem;">🏋️</div>
+    <h1 class="display-5 fw-bold text-success">Acesso Autorizado!</h1>
+    <p class="lead text-muted">@ViewData["Message"]</p>
+</div>
+
+<hr />
+
+<div class="row justify-content-center g-3 mt-2">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center p-4">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📊</div>
+                <h5 class="card-title">Relatórios</h5>
+                <p class="card-text text-muted small">Acompanhe os dados e métricas da academia.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center p-4">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">👥</div>
+                <h5 class="card-title">Clientes</h5>
+                <p class="card-text text-muted small">Gerencie os cadastros de alunos e clientes.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center p-4">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">💳</div>
+                <h5 class="card-title">Pagamentos</h5>
+                <p class="card-text text-muted small">Controle mensalidades e status de pagamento.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a asp-controller="Login" asp-action="Index" class="btn btn-outline-danger">
+        Sair do Sistema
+    </a>
+</div>
