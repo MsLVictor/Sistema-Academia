@@ -59,13 +59,83 @@ public class DashboardRepository
         using SqlDataReader r = comando.ExecuteReader();
         if (!r.Read()) return new DashboardViewModel();
 
-        return new DashboardViewModel
+        var vm = new DashboardViewModel
         {
             TotalAlunos       = (int)r["TotalAlunos"],
-            ReceitaMes        = (decimal)r["ReceitaMes"],
+            ReceitaMes        = Convert.ToDecimal(r["ReceitaMes"]),
             VencimentosSemana = (int)r["VencimentosSemana"],
             ParcelasAtrasadas = (int)r["ParcelasAtrasadas"],
             PresentesHoje     = (int)r["PresentesHoje"]
         };
+        r.Close();
+
+        vm.TendenciaReceita = CarregarTendencia(conexao, idAcademia);
+        vm.AlertasAtraso    = CarregarAlertas(conexao, idAcademia);
+
+        return vm;
+    }
+
+    private List<ReceitaMensalItem> CarregarTendencia(SqlConnection conexao, int idAcademia)
+    {
+        string sql = @"
+            SELECT YEAR(pg.DataPagamento) AS Ano, MONTH(pg.DataPagamento) AS Mes,
+                   SUM(pg.ValorPago) AS Total
+            FROM Pagamento pg
+            INNER JOIN MatriculaCliente mc ON mc.Id = pg.IdMatriculaCliente
+            INNER JOIN Cliente cl          ON cl.Id = mc.IdCliente
+            INNER JOIN StatusPagamento sp  ON sp.Id = pg.IdStatusPagamento
+            WHERE cl.IdAcademia = @id
+              AND sp.Nome = 'Pago'
+              AND pg.DataPagamento >= DATEFROMPARTS(YEAR(DATEADD(MONTH,-5,GETDATE())), MONTH(DATEADD(MONTH,-5,GETDATE())), 1)
+            GROUP BY YEAR(pg.DataPagamento), MONTH(pg.DataPagamento)
+            ORDER BY Ano, Mes";
+
+        using SqlCommand cmd = new(sql, conexao);
+        cmd.Parameters.AddWithValue("@id", idAcademia);
+        using SqlDataReader r = cmd.ExecuteReader();
+
+        var porMes = new Dictionary<(int, int), decimal>();
+        while (r.Read())
+            porMes[(r.GetInt32(0), r.GetInt32(1))] = Convert.ToDecimal(r["Total"]);
+        r.Close();
+
+        string[] nomeMes = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+        var lista = new List<ReceitaMensalItem>();
+        for (int i = 5; i >= 0; i--)
+        {
+            var d = DateTime.Today.AddMonths(-i);
+            porMes.TryGetValue((d.Year, d.Month), out decimal valor);
+            lista.Add(new ReceitaMensalItem(nomeMes[d.Month - 1], valor));
+        }
+        return lista;
+    }
+
+    private List<AlertaAtrasoItem> CarregarAlertas(SqlConnection conexao, int idAcademia)
+    {
+        string sql = @"
+            SELECT TOP 5
+                cl.Nome,
+                DATEDIFF(DAY, pg.DataVencimento, GETDATE()) AS DiasAtraso,
+                pg.ValorPago AS ValorParcela
+            FROM Pagamento pg
+            INNER JOIN MatriculaCliente mc ON mc.Id = pg.IdMatriculaCliente
+            INNER JOIN Cliente cl          ON cl.Id = mc.IdCliente
+            INNER JOIN StatusPagamento sp  ON sp.Id = pg.IdStatusPagamento
+            WHERE cl.IdAcademia = @id
+              AND sp.Nome = 'Pendente'
+              AND pg.DataVencimento < CAST(GETDATE() AS DATE)
+            ORDER BY DiasAtraso DESC";
+
+        using SqlCommand cmd = new(sql, conexao);
+        cmd.Parameters.AddWithValue("@id", idAcademia);
+        using SqlDataReader r = cmd.ExecuteReader();
+
+        var lista = new List<AlertaAtrasoItem>();
+        while (r.Read())
+            lista.Add(new AlertaAtrasoItem(
+                r["Nome"].ToString(),
+                (int)r["DiasAtraso"],
+                Convert.ToDecimal(r["ValorParcela"])));
+        return lista;
     }
 }

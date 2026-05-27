@@ -222,30 +222,45 @@
         </div>
       </div>
 
+      @{
+        var maxReceita = dash.TendenciaReceita.Any() ? dash.TendenciaReceita.Max(t => t.Valor) : 1m;
+        if (maxReceita == 0) maxReceita = 1m;
+      }
       <div class="grade-conteudo">
         <div class="cartao">
           <h2>Tendência de Receita</h2>
           <div class="caixa-grafico">
-            <div class="barra" style="height: 40%;"></div>
-            <div class="barra" style="height: 55%;"></div>
-            <div class="barra" style="height: 65%;"></div>
-            <div class="barra" style="height: 80%;"></div>
-            <div class="barra" style="height: 75%;"></div>
-            <div class="barra" style="height: 95%;"></div>
+            @foreach (var mes in dash.TendenciaReceita)
+            {
+              int altura = mes.Valor > 0 ? (int)(mes.Valor / maxReceita * 90) : 4;
+              <div class="barra" style="height: @(altura)%;"
+                   title="@mes.Mes: @mes.Valor.ToString("C", new System.Globalization.CultureInfo("pt-BR"))"></div>
+            }
           </div>
           <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 11px; color: var(--texto-muted); font-family: var(--fonte-mono);">
-            <span>JAN</span><span>FEV</span><span>MAR</span><span>ABR</span><span>MAI</span><span>JUN</span>
+            @foreach (var mes in dash.TendenciaReceita)
+            {
+              <span>@mes.Mes.ToUpper()</span>
+            }
           </div>
         </div>
         <div class="cartao">
-          <h2>Alertas Recentes</h2>
-          <div style="display: flex; flex-direction: column; gap: 12px;">
-            <div style="padding: 12px; border: 1px solid var(--borda); border-radius: var(--raio); font-size: 13px;">
-              <strong>Carlos Lima</strong> está com mensalidade atrasada há 5 dias.
-            </div>
-            <div style="padding: 12px; border: 1px solid var(--borda); border-radius: var(--raio); font-size: 13px;">
-              <strong>Evento "Desafio 21 Dias"</strong> precisa ser aprovado.
-            </div>
+          <h2>Pagamentos em Atraso</h2>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            @if (!dash.AlertasAtraso.Any())
+            {
+              <p style="font-size: 13px; color: var(--texto-muted); margin: 0;">Nenhum pagamento em atraso.</p>
+            }
+            @foreach (var alerta in dash.AlertasAtraso)
+            {
+              <div style="padding: 12px; background: oklch(97% 0.02 15); border: 1px solid oklch(85% 0.08 15); border-radius: var(--raio); font-size: 13px;">
+                <strong>@alerta.NomeCliente</strong> —
+                <span style="color: oklch(35% 0.15 15);">@alerta.DiasAtraso @(alerta.DiasAtraso == 1 ? "dia" : "dias") em atraso</span>
+                <span style="float: right; font-family: var(--fonte-mono); font-weight: 600;">
+                  @alerta.ValorParcela.ToString("C", new System.Globalization.CultureInfo("pt-BR"))
+                </span>
+              </div>
+            }
           </div>
         </div>
       </div>
