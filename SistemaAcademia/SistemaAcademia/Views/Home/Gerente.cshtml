@@ -1,0 +1,239 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gerente · FitManager</title>
+  <style>
+    :root {
+      --fundo:          oklch(99% 0.002 240);
+      --superficie:     oklch(100% 0 0);
+      --texto:          oklch(18% 0.012 250);
+      --texto-muted:    oklch(54% 0.012 250);
+      --borda:          oklch(92% 0.005 250);
+      --destaque:       oklch(82% 0.18 145);
+      --destaque-suave: color-mix(in oklch, var(--destaque) 14%, transparent);
+
+      --fonte-titulo: 'Iowan Old Style', 'Charter', Georgia, serif;
+      --fonte-corpo:  -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+      --raio:    10px;
+      --raio-lg: 16px;
+      --largura-sidebar: 260px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--fundo); color: var(--texto); font-family: var(--fonte-corpo); display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: var(--largura-sidebar);
+      background: var(--superficie);
+      border-right: 1px solid var(--borda);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+    }
+    .sidebar-logo { font-family: var(--fonte-titulo); font-size: 22px; font-weight: 700; margin-bottom: 32px; }
+    .sidebar-logo span { color: var(--destaque); }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: var(--raio);
+      font-size: 14px; font-weight: 500; color: var(--texto-muted);
+      cursor: pointer; text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+      margin-bottom: 2px;
+    }
+    .nav-item:hover, .nav-item.ativo { background: var(--destaque-suave); color: var(--texto); }
+
+    .nav-secao { font-size: 11px; font-weight: 600; color: var(--texto-muted); text-transform: uppercase; letter-spacing: .06em; padding: 16px 12px 6px; }
+
+    .sidebar-rodape { margin-top: auto; }
+    .info-usuario { display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--fundo); border-radius: var(--raio); margin-bottom: 8px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--destaque); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+    .info-usuario-texto { font-size: 13px; }
+    .info-usuario-texto strong { display: block; }
+    .info-usuario-texto span { color: var(--texto-muted); font-size: 12px; }
+
+    .btn-sair {
+      width: 100%; padding: 10px; border: 1px solid var(--borda); background: transparent;
+      border-radius: var(--raio); font-size: 14px; color: var(--texto-muted); cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-sair:hover { background: oklch(97% 0.02 15); color: oklch(35% 0.15 15); border-color: oklch(85% 0.08 15); }
+
+    .conteudo { margin-left: var(--largura-sidebar); flex: 1; padding: 32px; }
+
+    .cabecalho-pagina { margin-bottom: 28px; }
+    .cabecalho-pagina h2 { font-family: var(--fonte-titulo); font-size: 26px; margin: 0 0 4px; }
+    .cabecalho-pagina p { color: var(--texto-muted); font-size: 14px; margin: 0; }
+
+    .grade-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .card {
+      background: var(--superficie);
+      border: 1px solid var(--borda);
+      border-radius: var(--raio-lg);
+      padding: 20px;
+    }
+    .card-label { font-size: 12px; font-weight: 600; color: var(--texto-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
+    .card-valor { font-size: 28px; font-weight: 700; font-family: var(--fonte-titulo); margin-bottom: 4px; }
+    .card-desc { font-size: 13px; color: var(--texto-muted); }
+
+    .secao { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-lg); padding: 24px; margin-bottom: 20px; }
+    .secao-titulo { font-size: 16px; font-weight: 600; margin: 0 0 16px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { text-align: left; font-size: 12px; font-weight: 600; color: var(--texto-muted); text-transform: uppercase; letter-spacing: .04em; padding: 8px 12px; border-bottom: 1px solid var(--borda); }
+    td { padding: 12px; border-bottom: 1px solid var(--borda); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--fundo); }
+
+    .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+    .badge-ativo  { background: color-mix(in oklch, var(--destaque) 15%, transparent); color: oklch(35% 0.15 145); }
+    .badge-alerta { background: oklch(96% 0.04 80); color: oklch(40% 0.12 80); }
+    .badge-erro   { background: oklch(96% 0.03 15); color: oklch(40% 0.12 15); }
+
+    .secao-oculta { display: none; }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">Fit<span>Manager</span></div>
+
+    <p class="nav-secao">Visão Geral</p>
+    <a class="nav-item ativo" onclick="mostrarSecao('dashboard')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+
+    <p class="nav-secao">Gestão</p>
+    <a class="nav-item" onclick="mostrarSecao('alunos')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Alunos
+    </a>
+    <a class="nav-item" onclick="mostrarSecao('planos')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Planos
+    </a>
+    <a class="nav-item" onclick="mostrarSecao('financeiro')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      Financeiro
+    </a>
+    <a class="nav-item" onclick="mostrarSecao('relatorios')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Relatórios
+    </a>
+
+    <div class="sidebar-rodape">
+      <div class="info-usuario">
+        <div class="avatar">@(ViewData["Nome"]?.ToString()?.Substring(0,1).ToUpper() ?? "G")</div>
+        <div class="info-usuario-texto">
+          <strong>@ViewData["Nome"]</strong>
+          <span>Gerente</span>
+        </div>
+      </div>
+      <a href="/Login/Sair" class="btn-sair">Sair</a>
+    </div>
+  </aside>
+
+  <main class="conteudo">
+
+    <!-- Dashboard -->
+    <section id="secao-dashboard">
+      <div class="cabecalho-pagina">
+        <h2>Dashboard</h2>
+        <p>Visão geral da academia</p>
+      </div>
+
+      <div class="grade-cards">
+        <div class="card">
+          <div class="card-label">Alunos Ativos</div>
+          <div class="card-valor">—</div>
+          <div class="card-desc">a conectar</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Receita do Mês</div>
+          <div class="card-valor">—</div>
+          <div class="card-desc">a conectar</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Inadimplentes</div>
+          <div class="card-valor">—</div>
+          <div class="card-desc">a conectar</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Novos no Mês</div>
+          <div class="card-valor">—</div>
+          <div class="card-desc">a conectar</div>
+        </div>
+      </div>
+
+      <div class="secao">
+        <p class="secao-titulo">Vencimentos próximos (7 dias)</p>
+        <p style="color:var(--texto-muted);font-size:14px;">Dados serão exibidos após conexão com o banco.</p>
+      </div>
+    </section>
+
+    <!-- Alunos -->
+    <section id="secao-alunos" class="secao-oculta">
+      <div class="cabecalho-pagina">
+        <h2>Alunos</h2>
+        <p>Listagem e status dos alunos cadastrados</p>
+      </div>
+      <div class="secao">
+        <p style="color:var(--texto-muted);font-size:14px;">Módulo em implementação — Etapa 3 do roadmap.</p>
+      </div>
+    </section>
+
+    <!-- Planos -->
+    <section id="secao-planos" class="secao-oculta">
+      <div class="cabecalho-pagina">
+        <h2>Planos</h2>
+        <p>Planos e modalidades da academia</p>
+      </div>
+      <div class="secao">
+        <p style="color:var(--texto-muted);font-size:14px;">Módulo em implementação — Etapa 4 do roadmap.</p>
+      </div>
+    </section>
+
+    <!-- Financeiro -->
+    <section id="secao-financeiro" class="secao-oculta">
+      <div class="cabecalho-pagina">
+        <h2>Financeiro</h2>
+        <p>Mensalidades e pagamentos</p>
+      </div>
+      <div class="secao">
+        <p style="color:var(--texto-muted);font-size:14px;">Módulo em implementação — Etapa 5 do roadmap.</p>
+      </div>
+    </section>
+
+    <!-- Relatórios -->
+    <section id="secao-relatorios" class="secao-oculta">
+      <div class="cabecalho-pagina">
+        <h2>Relatórios</h2>
+        <p>Análises financeiras e de frequência</p>
+      </div>
+      <div class="secao">
+        <p style="color:var(--texto-muted);font-size:14px;">Módulo em implementação — Etapa 11 do roadmap.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function mostrarSecao(nome) {
+      document.querySelectorAll('main > section').forEach(s => s.classList.add('secao-oculta'));
+      document.getElementById(`secao-${nome}`).classList.remove('secao-oculta');
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('ativo'));
+      event.currentTarget.classList.add('ativo');
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,370 @@
+
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login · Sistema de Gestão de Academia</title>
+  <style>
+    :root {
+      --bg:      oklch(99% 0.002 240);
+      --surface: oklch(100% 0 0);
+      --fg:      oklch(18% 0.012 250);
+      --muted:   oklch(54% 0.012 250);
+      --border:  oklch(92% 0.005 250);
+      --accent:  oklch(82% 0.18 145);
+
+      --font-display: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
+      --font-body:    -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --font-mono:    ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+
+      --radius: 10px;
+      --radius-lg: 16px;
+      --shadow: 0 4px 12px color-mix(in oklch, var(--fg) 8%, transparent);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 500px;
+      padding: 40px;
+      box-shadow: var(--shadow);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .header h1 {
+      font-family: var(--font-display);
+      font-size: 32px;
+      margin: 0 0 8px;
+    }
+    .header p {
+      color: var(--muted);
+      font-size: 15px;
+      margin: 0;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: color-mix(in oklch, var(--bg) 80%, var(--fg) 5%);
+      padding: 4px;
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+    }
+    .tab-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: calc(var(--radius) - 2px);
+      cursor: pointer;
+      color: var(--muted);
+      transition: all 0.2s ease;
+    }
+    .tab-btn.active {
+      background: var(--surface);
+      color: var(--fg);
+      box-shadow: 0 2px 4px color-mix(in oklch, var(--fg) 5%, transparent);
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .progress-bar::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--border);
+      z-index: 1;
+      transform: translateY(-50%);
+    }
+    .step-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      z-index: 2;
+      transition: all 0.3s ease;
+    }
+    .step-dot.active { border-color: var(--accent); background: var(--accent); color: var(--fg); }
+    .step-dot.completed { border-color: var(--accent); background: var(--accent); color: var(--fg); }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--fg);
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: inherit;
+      font-size: 15px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent) 20%, transparent);
+    }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .btn-row { display: flex; gap: 12px; margin-top: 24px; }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: var(--accent); color: var(--fg); }
+    .btn-primary:hover { background: color-mix(in oklch, var(--accent) 85%, white); }
+    .btn-secondary { background: var(--bg); color: var(--fg); border: 1px solid var(--border); }
+
+    .footer-link { text-align: center; margin-top: 24px; font-size: 14px; color: var(--muted); }
+    .footer-link a { color: var(--fg); text-decoration: none; font-weight: 600; }
+    .footer-link a:hover { text-decoration: underline; }
+
+    .hidden { display: none; }
+    .info-box {
+      background: color-mix(in oklch, var(--accent) 10%, transparent);
+      border: 1px solid color-mix(in oklch, var(--accent) 20%, transparent);
+      padding: 12px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      color: var(--fg);
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .animate-slide { animation: slideIn 0.3s ease forwards; }
+    .col-span-2 { grid-column: span 2; }
+
+  </style>
+</head>
+<body>
+
+  <div class="auth-card">
+    <div class="header">
+      <h1>FitManager</h1>
+      <p id="header-text">Acesse sua conta para continuar</p>
+    </div>
+
+    <div class="tabs" id="auth-tabs">
+      <button class="tab-btn active" onclick="switchTab('login')">Entrar</button>
+      <button class="tab-btn" onclick="switchTab('register')">Cadastrar Academia</button>
+    </div>
+
+    <!-- Login View -->
+    <div id="login-view" class="animate-slide">
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="login-email">E-mail</label>
+          <input type="email" id="login-email" placeholder="nome@exemplo.com" required>
+        </div>
+        <div class="form-group">
+          <label for="login-password">Senha</label>
+          <input type="password" id="login-password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Entrar no Sistema</button>
+      </form>
+    </div>
+
+    <!-- Register View (Wizard) -->
+    <div id="register-view" class="hidden">
+      <div class="progress-bar">
+        <div class="step-dot active" id="dot-1">1</div>
+        <div class="step-dot" id="dot-2">2</div>
+        <div class="step-dot" id="dot-3">3</div>
+      </div>
+
+      <form id="register-form" onsubmit="handleFinalSubmit(event)">
+        
+        <!-- Step 1: Personal Info -->
+        <div id="step-1" class="animate-slide">
+          <div class="info-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>Primeiro, precisamos dos seus dados pessoais para criar seu perfil.</span>
+          </div>
+          <div class="form-group">
+            <label for="reg-name">Nome Completo</label>
+            <input type="text" id="reg-name" placeholder="Ex: João Silva" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-cpf">CPF</label>
+            <input type="text" id="reg-cpf" placeholder="000.000.000-00" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-email">E-mail Pessoal</label>
+            <input type="email" id="reg-email" placeholder="joao@exemplo.com" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-password">Criar Senha</label>
+            <input type="password" id="reg-password" placeholder="Mínimo 8 caracteres" required>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="goToStep(2)">Próximo: Dados da Academia</button>
+        </div>
+
+        <!-- Step 2: Academy Info -->
+        <div id="step-2" class="hidden animate-slide">
+          <div class="form-group">
+            <label for="gym-name">Nome da Academia</label>
+            <input type="text" id="gym-name" placeholder="Ex: Iron Gym Matriz">
+          </div>
+          <div class="form-group">
+            <label for="gym-cnpj">CNPJ</label>
+            <input type="text" id="gym-cnpj" placeholder="00.000.000/0000-00">
+          </div>
+          <div class="form-group">
+            <label for="gym-email">E-mail da Academia</label>
+            <input type="email" id="gym-email" placeholder="contato@academia.com">
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-secondary" onclick="goToStep(1)">Voltar</button>
+            <button type="button" class="btn btn-primary" onclick="goToStep(3)">Próximo: Endereço</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Address Info -->
+        <div id="step-3" class="hidden animate-slide">
+          <div class="form-grid">
+            <div class="form-group col-span-2">
+              <label for="addr-street">Logradouro</label>
+              <input type="text" id="addr-street" placeholder="Rua, Avenida...">
+            </div>
+            <div class="form-group">
+              <label for="addr-number">Número</label>
+              <input type="text" id="addr-number" placeholder="123">
+            </div>
+            <div class="form-group">
+              <label for="addr-complement">Complemento</label>
+              <input type="text" id="addr-complement" placeholder="Apto, Sala">
+            </div>
+            <div class="form-group">
+              <label for="addr-neighborhood">Bairro</label>
+              <input type="text" id="addr-neighborhood" placeholder="Centro">
+            </div>
+            <div class="form-group">
+              <label for="addr-cep">CEP</label>
+              <input type="text" id="addr-cep" placeholder="00000-000">
+            </div>
+            <div class="form-group">
+              <label for="addr-city">Cidade</label>
+              <input type="text" id="addr-city" placeholder="São Paulo">
+            </div>
+            <div class="form-group">
+              <label for="addr-state">Estado</label>
+              <input type="text" id="addr-state" placeholder="SP">
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-secondary" onclick="goToStep(2)">Voltar</button>
+            <button type="submit" class="btn btn-primary">Finalizar Cadastro</button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(view) {
+      const loginView = document.getElementById('login-view');
+      const registerView = document.getElementById('register-view');
+      const headerText = document.getElementById('header-text');
+      const tabs = document.querySelectorAll('.tab-btn');
+
+      if (view === 'login') {
+        loginView.classList.remove('hidden');
+        registerView.classList.add('hidden');
+        headerText.innerText = 'Acesse sua conta para continuar';
+        tabs[0].classList.add('active'); tabs[1].classList.remove('active');
+      } else {
+        loginView.classList.add('hidden');
+        registerView.classList.remove('hidden');
+        headerText.innerText = 'Comece a gerir sua academia';
+        tabs[0].classList.remove('active'); tabs[1].classList.add('active');
+        goToStep(1);
+      }
+    }
+
+    function goToStep(step) {
+      ['step-1', 'step-2', 'step-3'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      document.getElementById(`step-${step}`).classList.remove('hidden');
+      document.querySelectorAll('.step-dot').forEach((dot, idx) => {
+        dot.classList.remove('active', 'completed');
+        if (idx + 1 === step) dot.classList.add('active');
+        if (idx + 1 < step) dot.classList.add('completed');
+      });
+    }
+
+    function handleLogin(e) { e.preventDefault(); window.location.href = 'index.html'; }
+    function handleFinalSubmit(e) {
+      e.preventDefault();
+      alert('Cadastro realizado com sucesso! Bem-vindo ao FitManager.');
+      window.location.href = 'index.html';
+    }
+
+    // Masking
+    document.getElementById('reg-cpf').addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+      e.target.value = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    });
+    document.getElementById('gym-cnpj').addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 14);
+      e.target.value = v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    });
+  </script>
+</body>
+</html>

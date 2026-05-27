@@ -1,0 +1,447 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard · FitManager</title>
+  <style>
+    :root {
+      --fundo:          oklch(99% 0.002 240);
+      --superficie:     oklch(100% 0 0);
+      --texto:          oklch(18% 0.012 250);
+      --texto-muted:    oklch(54% 0.012 250);
+      --borda:          oklch(92% 0.005 250);
+      --destaque:       oklch(82% 0.18 145);
+      --destaque-suave: color-mix(in oklch, var(--destaque) 14%, transparent);
+      --texto-suave:    color-mix(in oklch, var(--texto) 6%, transparent);
+
+      --fonte-titulo: 'Iowan Old Style', 'Charter', Georgia, serif;
+      --fonte-corpo:  -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --fonte-mono:   ui-monospace, 'JetBrains Mono', monospace;
+
+      --gap-sm: 12px;
+      --gap-md: 20px;
+      --gap-lg: 32px;
+      --raio:    10px;
+      --raio-lg: 16px;
+      --largura-sidebar: 260px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--fundo);
+      color: var(--texto);
+      font-family: var(--fonte-corpo);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--largura-sidebar);
+      background: var(--superficie);
+      border-right: 1px solid var(--borda);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+    }
+    .logo {
+      font-family: var(--fonte-titulo);
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 40px;
+      cursor: pointer;
+    }
+    .nav { list-style: none; padding: 0; margin: 0; flex-grow: 1; }
+    .nav-item { margin-bottom: 8px; }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: var(--raio);
+      color: var(--texto-muted);
+      text-decoration: none;
+      font-size: 14px;
+      transition: background 0.2s, color 0.2s;
+      cursor: pointer;
+    }
+    .nav-link:hover, .nav-link.ativa {
+      background: var(--destaque-suave);
+      color: var(--texto);
+    }
+    .nav-link.ativa { font-weight: 600; }
+
+    /* Conteúdo principal */
+    .principal {
+      margin-left: var(--largura-sidebar);
+      flex-grow: 1;
+      padding: 40px;
+      max-width: 1200px;
+    }
+    .secao-visao { display: none; }
+    .secao-visao.ativa { display: block; animation: aparecer 0.3s ease; }
+
+    @@keyframes aparecer {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+    .titulo-pagina { font-family: var(--fonte-titulo); font-size: 32px; margin: 0; }
+
+    /* Cards de estatísticas */
+    .grade-estatisticas { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap-md); margin-bottom: 40px; }
+    .cartao-estatistica { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-lg); padding: 24px; }
+    .rotulo-estatistica { font-size: 12px; color: var(--texto-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .valor-estatistica { font-family: var(--fonte-mono); font-size: 28px; font-weight: 600; }
+    .variacao-estatistica { font-size: 12px; margin-top: 4px; }
+    .positivo { color: #17A34A; }
+    .negativo { color: #DC2626; }
+
+    .grade-conteudo { display: grid; grid-template-columns: 2fr 1fr; gap: var(--gap-lg); }
+    .cartao { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-lg); padding: 28px; margin-bottom: var(--gap-lg); }
+    .cartao h2 { font-family: var(--fonte-titulo); font-size: 20px; margin: 0 0 20px; }
+
+    /* Tabela */
+    .tabela-dados { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .tabela-dados th, .tabela-dados td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--borda); }
+    .tabela-dados th { color: var(--texto-muted); font-weight: 500; font-family: var(--fonte-mono); font-size: 11px; text-transform: uppercase; }
+    .tabela-dados tr:hover { background: var(--fundo); }
+
+    .etiqueta { padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .etiqueta-sucesso { background: #DCFCE7; color: #166534; }
+    .etiqueta-aviso   { background: #FEF9C3; color: #854D0E; }
+    .etiqueta-erro    { background: #FEE2E2; color: #991B1B; }
+
+    /* Botões e formulários */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: var(--raio);
+      border: 1px solid var(--borda);
+      background: var(--superficie);
+      color: var(--texto);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-primario { background: var(--destaque); border-color: var(--destaque); }
+    .btn-primario:hover { background: color-mix(in oklch, var(--destaque) 85%, white); }
+
+    .grupo-input { margin-bottom: 20px; }
+    .grupo-input label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--texto-muted); }
+    .grupo-input input, .grupo-input select, .grupo-input textarea {
+      width: 100%; padding: 10px 14px; border: 1px solid var(--borda); border-radius: var(--raio); font-family: inherit; font-size: 14px;
+    }
+
+    /* Gráfico de barras */
+    .caixa-grafico {
+      height: 200px;
+      background: var(--texto-suave);
+      border-radius: var(--raio);
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      padding: 20px;
+    }
+    .barra { flex-grow: 1; background: var(--destaque); border-radius: 4px 4px 0 0; transition: height 0.3s ease; }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="logo" onclick="alternarSecao('dashboard')">FitManager</div>
+    <ul class="nav">
+      <li class="nav-item"><a onclick="alternarSecao('dashboard')"    id="nav-dashboard"    class="nav-link ativa">Dashboard</a></li>
+      <li class="nav-item"><a asp-controller="Cliente" asp-action="Listar" class="nav-link">Gestão de Alunos</a></li>
+      <li class="nav-item"><a asp-controller="CheckIn" asp-action="Scanner" class="nav-link">Check-in</a></li>
+      <li class="nav-item"><a asp-controller="CheckIn" asp-action="Presentes" class="nav-link">Alunos Presentes</a></li>
+      <li class="nav-item"><a asp-controller="Plano" asp-action="Listar" class="nav-link">Planos</a></li>
+      <li class="nav-item"><a asp-controller="Modalidade" asp-action="Listar" class="nav-link">Modalidades</a></li>
+      <li class="nav-item"><a onclick="alternarSecao('funcionarios')" id="nav-funcionarios" class="nav-link">Funcionários</a></li>
+    </ul>
+    <div style="margin-top: auto;">
+      <a asp-controller="Login" asp-action="Sair" class="nav-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Sair
+      </a>
+    </div>
+  </aside>
+
+  <main class="principal">
+
+    <!-- Dashboard -->
+    <section id="secao-dashboard" class="secao-visao ativa">
+      <header>
+        <h1 class="titulo-pagina">Bem-vindo, @(Context.Session.GetString("UsuarioNome") ?? "Administrador")</h1>
+        <div style="display: flex; gap: 12px;">
+          <a asp-controller="Cliente" asp-action="Cadastrar" class="btn btn-primario">+ Novo Aluno</a>
+        </div>
+      </header>
+
+      @{
+        var dash = ViewBag.Dashboard as SistemaAcademia.Models.DashboardViewModel ?? new SistemaAcademia.Models.DashboardViewModel();
+      }
+      <div class="grade-estatisticas">
+        <div class="cartao-estatistica">
+          <div class="rotulo-estatistica">Alunos Ativos</div>
+          <div class="valor-estatistica">@dash.TotalAlunos</div>
+          <div class="variacao-estatistica">Cadastrados e ativos</div>
+        </div>
+        <div class="cartao-estatistica">
+          <div class="rotulo-estatistica">Receita do Mês</div>
+          <div class="valor-estatistica">@dash.ReceitaMes.ToString("C", new System.Globalization.CultureInfo("pt-BR"))</div>
+          <div class="variacao-estatistica">Pagamentos confirmados</div>
+        </div>
+        <div class="cartao-estatistica">
+          <div class="rotulo-estatistica">Vencimentos (7 dias)</div>
+          <div class="valor-estatistica">@dash.VencimentosSemana</div>
+          <div class="variacao-estatistica @(dash.VencimentosSemana > 0 ? "negativo" : "")">Parcelas em aberto</div>
+        </div>
+        <div class="cartao-estatistica">
+          <div class="rotulo-estatistica">Presentes Hoje</div>
+          <div class="valor-estatistica">@dash.PresentesHoje</div>
+          <div class="variacao-estatistica @(dash.ParcelasAtrasadas > 0 ? "negativo" : "")">@dash.ParcelasAtrasadas atrasado(s)</div>
+        </div>
+      </div>
+
+      <div class="grade-conteudo">
+        <div class="cartao">
+          <h2>Tendência de Receita</h2>
+          <div class="caixa-grafico">
+            <div class="barra" style="height: 40%;"></div>
+            <div class="barra" style="height: 55%;"></div>
+            <div class="barra" style="height: 65%;"></div>
+            <div class="barra" style="height: 80%;"></div>
+            <div class="barra" style="height: 75%;"></div>
+            <div class="barra" style="height: 95%;"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 11px; color: var(--texto-muted); font-family: var(--fonte-mono);">
+            <span>JAN</span><span>FEV</span><span>MAR</span><span>ABR</span><span>MAI</span><span>JUN</span>
+          </div>
+        </div>
+        <div class="cartao">
+          <h2>Alertas Recentes</h2>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="padding: 12px; border: 1px solid var(--borda); border-radius: var(--raio); font-size: 13px;">
+              <strong>Carlos Lima</strong> está com mensalidade atrasada há 5 dias.
+            </div>
+            <div style="padding: 12px; border: 1px solid var(--borda); border-radius: var(--raio); font-size: 13px;">
+              <strong>Evento "Desafio 21 Dias"</strong> precisa ser aprovado.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Funcionários -->
+    <section id="secao-funcionarios" class="secao-visao">
+      <header>
+        <h1 class="titulo-pagina">Gestão da Equipe</h1>
+        <button class="btn btn-primario" onclick="alternarFormularioFuncionario()">+ Novo Funcionário</button>
+      </header>
+
+      @if (TempData["SucessoFuncionario"] != null)
+      {
+          <div style="background: color-mix(in oklch, var(--destaque) 12%, transparent); border: 1px solid color-mix(in oklch, var(--destaque) 30%, transparent); color: oklch(30% 0.1 145); border-radius: var(--raio); padding: 12px 16px; font-size: 14px; margin-bottom: 20px;">
+              @TempData["SucessoFuncionario"]
+          </div>
+      }
+      @if (TempData["ErroFuncionario"] != null)
+      {
+          <div style="background: oklch(97% 0.02 15); border: 1px solid oklch(85% 0.08 15); color: oklch(35% 0.15 15); border-radius: var(--raio); padding: 12px 16px; font-size: 14px; margin-bottom: 20px;">
+              @TempData["ErroFuncionario"]
+          </div>
+      }
+
+      <div id="formulario-funcionario" style="display: none;">
+        <div class="cartao" style="margin-bottom: var(--gap-md);">
+          <h2>Cadastrar Novo Funcionário</h2>
+          <form asp-controller="Funcionario" asp-action="Cadastrar" method="post">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="grupo-input" style="grid-column: span 2;">
+                <label>Nome Completo</label>
+                <input type="text" name="NomeFuncionario" placeholder="Ex: João Silva" required>
+              </div>
+              <div class="grupo-input">
+                <label>CPF</label>
+                <input type="text" id="cpf-funcionario" name="CPFFuncionario" placeholder="000.000.000-00" maxlength="14" required>
+              </div>
+              <div class="grupo-input">
+                <label>Cargo</label>
+                <select name="IdCargo" style="width: 100%; padding: 10px 14px; border: 1px solid var(--borda); border-radius: var(--raio); font-family: inherit; font-size: 14px;" required>
+                  <option value="">Selecione um cargo</option>
+                  @if (ViewBag.Cargos != null)
+                  {
+                      foreach (var cargo in ViewBag.Cargos)
+                      {
+                          <option value="@cargo.Id">@cargo.Nome</option>
+                      }
+                  }
+                </select>
+              </div>
+              <div class="grupo-input">
+                <label>E-mail</label>
+                <input type="email" name="EmailFuncionario" placeholder="funcionario@academia.com" required>
+              </div>
+              <div class="grupo-input">
+                <label>Senha</label>
+                <input type="password" name="SenhaFuncionario" placeholder="Mínimo 8 caracteres" minlength="8" required>
+              </div>
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 8px;">
+              <button type="submit" class="btn btn-primario">Cadastrar</button>
+              <button type="button" class="btn" onclick="alternarFormularioFuncionario()">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="cartao">
+        <table class="tabela-dados">
+          <thead>
+            <tr><th>Funcionário</th><th>Cargo / Permissão</th><th>E-mail</th><th>Status</th><th>Ações</th></tr>
+          </thead>
+          <tbody>
+            @if (ViewBag.Funcionarios != null)
+            {
+                foreach (var f in ViewBag.Funcionarios)
+                {
+                    <tr>
+                      <td><strong>@f.Nome</strong><br><span style="font-size: 11px; color: var(--texto-muted);">@f.CPF</span></td>
+                      <td><span class="etiqueta" style="background: var(--fundo);">@f.Cargo</span></td>
+                      <td>@f.Email</td>
+                      <td>
+                        @if (f.Ativo == "A")
+                        { <span class="etiqueta etiqueta-sucesso">Ativo</span> }
+                        else
+                        { <span class="etiqueta etiqueta-erro">Inativo</span> }
+                      </td>
+                      <td style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <button class="btn" style="padding: 4px 10px;"
+                          data-id="@f.Id" data-nome="@f.Nome" data-email="@f.Email" data-idcargo="@f.IdCargo"
+                          onclick="abrirEditar(this)">Editar</button>
+                        @if (f.Ativo == "A")
+                        {
+                            <form asp-controller="Funcionario" asp-action="AlterarStatus" method="post" style="display:inline;">
+                              <input type="hidden" name="id" value="@f.Id" />
+                              <input type="hidden" name="ativo" value="I" />
+                              <button type="submit" class="btn" style="padding: 4px 10px; color: oklch(35% 0.15 15); border-color: oklch(85% 0.08 15);">Inativar</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-controller="Funcionario" asp-action="AlterarStatus" method="post" style="display:inline;">
+                              <input type="hidden" name="id" value="@f.Id" />
+                              <input type="hidden" name="ativo" value="A" />
+                              <button type="submit" class="btn" style="padding: 4px 10px; color: oklch(30% 0.1 145);">Reativar</button>
+                            </form>
+                        }
+                      </td>
+                    </tr>
+                }
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal Editar Funcionário -->
+  <div id="overlay-editar" style="display: none; position: fixed; inset: 0; background: oklch(0% 0 0 / 40%); z-index: 200; align-items: center; justify-content: center;">
+    <div class="cartao" style="width: 480px; max-width: 90vw; margin: 0;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0; font-family: var(--fonte-titulo); font-size: 20px;">Editar Funcionário</h2>
+        <button class="btn" onclick="fecharEditar()" style="padding: 4px 12px; font-size: 16px; line-height: 1;">✕</button>
+      </div>
+      <form asp-controller="Funcionario" asp-action="Editar" method="post">
+        <input type="hidden" id="editar-id" name="Id" />
+        <div class="grupo-input">
+          <label>Nome Completo</label>
+          <input type="text" id="editar-nome" name="NomeFuncionario" required>
+        </div>
+        <div class="grupo-input">
+          <label>E-mail</label>
+          <input type="email" id="editar-email" name="EmailFuncionario" required>
+        </div>
+        <div class="grupo-input">
+          <label>Cargo</label>
+          <select id="editar-cargo" name="IdCargo" style="width: 100%; padding: 10px 14px; border: 1px solid var(--borda); border-radius: var(--raio); font-family: inherit; font-size: 14px;" required>
+            @if (ViewBag.Cargos != null)
+            {
+                foreach (var cargo in ViewBag.Cargos)
+                {
+                    <option value="@cargo.Id">@cargo.Nome</option>
+                }
+            }
+          </select>
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 8px;">
+          <button type="submit" class="btn btn-primario">Salvar</button>
+          <button type="button" class="btn" onclick="fecharEditar()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function alternarSecao(identificador) {
+      document.querySelectorAll('.secao-visao').forEach(secao => secao.classList.remove('ativa'));
+      document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('ativa'));
+
+      const secaoAtiva = document.getElementById('secao-' + identificador);
+      if (secaoAtiva) secaoAtiva.classList.add('ativa');
+
+      const navAtivo = document.getElementById('nav-' + identificador);
+      if (navAtivo) navAtivo.classList.add('ativa');
+    }
+
+    function alternarFormularioFuncionario() {
+      const formulario = document.getElementById('formulario-funcionario');
+      formulario.style.display = formulario.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function abrirEditar(btn) {
+      document.getElementById('editar-id').value    = btn.dataset.id;
+      document.getElementById('editar-nome').value  = btn.dataset.nome;
+      document.getElementById('editar-email').value = btn.dataset.email;
+      document.getElementById('editar-cargo').value = btn.dataset.idcargo;
+      document.getElementById('overlay-editar').style.display = 'flex';
+    }
+
+    function fecharEditar() {
+      document.getElementById('overlay-editar').style.display = 'none';
+    }
+
+    document.getElementById('overlay-editar').addEventListener('click', e => {
+      if (e.target === e.currentTarget) fecharEditar();
+    });
+
+    document.getElementById('cpf-funcionario').addEventListener('input', e => {
+      let valor = e.target.value.replace(/\D/g, '').slice(0, 11);
+      e.target.value = valor.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    });
+
+    alternarSecao('@(ViewBag.SecaoInicial ?? "dashboard")');
+  </script>
+
+</body>
+</html>

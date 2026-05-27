@@ -1,0 +1,546 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login · Sistema de Gestão de Academia</title>
+  <style>
+    :root {
+      --fundo:        oklch(99% 0.002 240);
+      --superficie:   oklch(100% 0 0);
+      --texto:        oklch(18% 0.012 250);
+      --texto-muted:  oklch(54% 0.012 250);
+      --borda:        oklch(92% 0.005 250);
+      --destaque:     oklch(82% 0.18 145);
+
+      --fonte-titulo: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
+      --fonte-corpo:  -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+      --raio:    10px;
+      --raio-lg: 16px;
+      --sombra:  0 4px 12px color-mix(in oklch, var(--texto) 8%, transparent);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--fundo);
+      color: var(--texto);
+      font-family: var(--fonte-corpo);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .cartao-auth {
+      background: var(--superficie);
+      border: 1px solid var(--borda);
+      border-radius: var(--raio-lg);
+      width: 100%;
+      max-width: 500px;
+      padding: 40px;
+      box-shadow: var(--sombra);
+    }
+
+    .cabecalho {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .cabecalho h1 {
+      font-family: var(--fonte-titulo);
+      font-size: 32px;
+      margin: 0 0 8px;
+    }
+    .cabecalho p {
+      color: var(--texto-muted);
+      font-size: 15px;
+      margin: 0;
+    }
+
+    .abas {
+      display: flex;
+      gap: 4px;
+      background: color-mix(in oklch, var(--fundo) 80%, var(--texto) 5%);
+      padding: 4px;
+      border-radius: var(--raio);
+      margin-bottom: 24px;
+    }
+    .botao-aba {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: calc(var(--raio) - 2px);
+      cursor: pointer;
+      color: var(--texto-muted);
+      transition: all 0.2s ease;
+    }
+    .botao-aba.ativa {
+      background: var(--superficie);
+      color: var(--texto);
+      box-shadow: 0 2px 4px color-mix(in oklch, var(--texto) 5%, transparent);
+    }
+
+    .barra-progresso {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .barra-progresso::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--borda);
+      z-index: 1;
+      transform: translateY(-50%);
+    }
+    .ponto-etapa {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--superficie);
+      border: 2px solid var(--borda);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--texto-muted);
+      z-index: 2;
+      transition: all 0.3s ease;
+    }
+    .ponto-etapa.ativa    { border-color: var(--destaque); background: var(--destaque); color: var(--texto); }
+    .ponto-etapa.concluida { border-color: var(--destaque); background: var(--destaque); color: var(--texto); }
+
+    .grupo-campo { margin-bottom: 16px; }
+    .grupo-campo label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--texto);
+    }
+    .grupo-campo input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--borda);
+      border-radius: var(--raio);
+      font-family: inherit;
+      font-size: 15px;
+      background: var(--superficie);
+      color: var(--texto);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .grupo-campo input:focus,
+    .grupo-campo select:focus {
+      outline: none;
+      border-color: var(--destaque);
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--destaque) 20%, transparent);
+    }
+
+    .grupo-campo select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--borda);
+      border-radius: var(--raio);
+      font-family: inherit;
+      font-size: 15px;
+      background: var(--superficie);
+      color: var(--texto);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+
+    .cep-wrapper { position: relative; }
+    .cep-spinner {
+      display: none;
+      position: absolute;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      width: 16px; height: 16px;
+      border: 2px solid var(--borda);
+      border-top-color: var(--destaque);
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+    }
+    .cep-wrapper.carregando .cep-spinner { display: block; }
+    @@keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+
+    .grade-dois-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .coluna-cheia { grid-column: span 2; }
+
+    .linha-botoes { display: flex; gap: 12px; margin-top: 24px; }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--raio);
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primario    { background: var(--destaque); color: var(--texto); }
+    .btn-primario:hover { background: color-mix(in oklch, var(--destaque) 85%, white); }
+    .btn-secundario  { background: var(--fundo); color: var(--texto); border: 1px solid var(--borda); }
+
+    .caixa-info {
+      background: color-mix(in oklch, var(--destaque) 10%, transparent);
+      border: 1px solid color-mix(in oklch, var(--destaque) 20%, transparent);
+      padding: 12px;
+      border-radius: var(--raio);
+      font-size: 13px;
+      color: var(--texto);
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .caixa-erro {
+      background: oklch(97% 0.02 15);
+      border: 1px solid oklch(85% 0.08 15);
+      color: oklch(35% 0.15 15);
+      border-radius: var(--raio);
+      padding: 12px 16px;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .caixa-sucesso {
+      background: color-mix(in oklch, var(--destaque) 12%, transparent);
+      border: 1px solid color-mix(in oklch, var(--destaque) 30%, transparent);
+      color: oklch(30% 0.1 145);
+      border-radius: var(--raio);
+      padding: 12px 16px;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .oculto { display: none; }
+
+    @@keyframes deslizarEntrar {
+      from { opacity: 0; transform: translateX(20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .animar-entrada { animation: deslizarEntrar 0.3s ease forwards; }
+  </style>
+</head>
+<body>
+
+  <div class="cartao-auth">
+    <div class="cabecalho">
+      <h1>FitManager</h1>
+      <p id="texto-cabecalho">Acesse sua conta para continuar</p>
+    </div>
+
+    @if (TempData["SucessoCadastro"] != null)
+    {
+        <div class="caixa-sucesso">@TempData["SucessoCadastro"]</div>
+    }
+
+    <div class="abas" id="abas-auth">
+      <button class="botao-aba ativa" onclick="alternarAba('login')">Funcionário</button>
+      <button class="botao-aba" onclick="alternarAba('aluno')">Sou Aluno</button>
+      <button class="botao-aba" onclick="alternarAba('cadastro')">Nova Academia</button>
+    </div>
+
+    <!-- Aba: Login Funcionário -->
+    <div id="visao-login" class="animar-entrada">
+      @if (ViewBag.Erro != null)
+      {
+          <div class="caixa-erro">@ViewBag.Erro</div>
+      }
+      <form asp-controller="Login" asp-action="Logar" method="post">
+        <div class="grupo-campo">
+          <label for="login-email">E-mail</label>
+          <input type="email" id="login-email" name="email" placeholder="nome@exemplo.com" required>
+        </div>
+        <div class="grupo-campo">
+          <label for="login-senha">Senha</label>
+          <input type="password" id="login-senha" name="senha" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primario">Entrar no Sistema</button>
+      </form>
+    </div>
+
+    <!-- Aba: Login Aluno -->
+    <div id="visao-aluno" class="oculto">
+      @if (ViewBag.ErroCliente != null)
+      {
+          <div class="caixa-erro">@ViewBag.ErroCliente</div>
+      }
+      <form asp-controller="Login" asp-action="LogarCliente" method="post">
+        <div class="grupo-campo">
+          <label for="aluno-email">E-mail</label>
+          <input type="email" id="aluno-email" name="email" placeholder="nome@exemplo.com" required>
+        </div>
+        <div class="grupo-campo">
+          <label for="aluno-senha">Senha</label>
+          <input type="password" id="aluno-senha" name="senha" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primario">Acessar Minha Conta</button>
+      </form>
+    </div>
+
+    <!-- Aba: Cadastro de Academia (Wizard 3 etapas) -->
+    <div id="visao-cadastro" class="oculto">
+      @if (ViewBag.ErroCadastro != null)
+      {
+          <div class="caixa-erro">@ViewBag.ErroCadastro</div>
+      }
+
+      <div class="barra-progresso">
+        <div class="ponto-etapa ativa" id="ponto-1">1</div>
+        <div class="ponto-etapa" id="ponto-2">2</div>
+        <div class="ponto-etapa" id="ponto-3">3</div>
+      </div>
+
+      <form asp-controller="Login" asp-action="CadastrarAcademia" method="post">
+
+        <!-- Etapa 1: Dados pessoais do administrador -->
+        <div id="etapa-1" class="animar-entrada">
+          <div class="caixa-info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+            <span>Primeiro, precisamos dos seus dados pessoais para criar seu perfil de administrador.</span>
+          </div>
+          <div class="grupo-campo">
+            <label for="nome-administrador">Nome Completo</label>
+            <input type="text" id="nome-administrador" name="NomeAdministrador" placeholder="Ex: João Silva" required>
+          </div>
+          <div class="grupo-campo">
+            <label for="cpf-administrador">CPF</label>
+            <input type="text" id="cpf-administrador" name="CPFAdministrador" placeholder="000.000.000-00" maxlength="14" required>
+          </div>
+          <div class="grupo-campo">
+            <label for="email-administrador">E-mail Pessoal</label>
+            <input type="email" id="email-administrador" name="EmailAdministrador" placeholder="joao@exemplo.com" required>
+          </div>
+          <div class="grupo-campo">
+            <label for="senha-administrador">Criar Senha</label>
+            <input type="password" id="senha-administrador" name="SenhaAdministrador" placeholder="Mínimo 8 caracteres" minlength="8" required>
+          </div>
+          <button type="button" class="btn btn-primario" onclick="irParaEtapa(2)">Próximo: Dados da Academia</button>
+        </div>
+
+        <!-- Etapa 2: Dados da academia -->
+        <div id="etapa-2" class="oculto animar-entrada">
+          <div class="grupo-campo">
+            <label for="nome-academia">Nome da Academia</label>
+            <input type="text" id="nome-academia" name="NomeAcademia" placeholder="Ex: Iron Gym Matriz">
+          </div>
+          <div class="grupo-campo">
+            <label for="cnpj-academia">CNPJ</label>
+            <input type="text" id="cnpj-academia" name="CNPJAcademia" placeholder="00.000.000/0000-00" maxlength="18">
+          </div>
+          <div class="grupo-campo">
+            <label for="email-academia">E-mail da Academia</label>
+            <input type="email" id="email-academia" name="EmailAcademia" placeholder="contato@academia.com">
+          </div>
+          <div class="linha-botoes">
+            <button type="button" class="btn btn-secundario" onclick="irParaEtapa(1)">Voltar</button>
+            <button type="button" class="btn btn-primario" onclick="irParaEtapa(3)">Próximo: Endereço</button>
+          </div>
+        </div>
+
+        <!-- Etapa 3: Endereço da academia -->
+        <div id="etapa-3" class="oculto animar-entrada">
+          <div class="grade-dois-campos">
+            <div class="grupo-campo">
+              <label for="cep">CEP</label>
+              <div class="cep-wrapper" id="cep-wrapper">
+                <input type="text" id="cep" name="CEP" placeholder="00000-000" maxlength="9" autocomplete="off">
+                <div class="cep-spinner"></div>
+              </div>
+            </div>
+            <div class="grupo-campo">
+              <label for="estado">Estado</label>
+              <select id="estado" name="Estado">
+                <option value="">Selecione</option>
+                <option value="AC">AC — Acre</option>
+                <option value="AL">AL — Alagoas</option>
+                <option value="AP">AP — Amapá</option>
+                <option value="AM">AM — Amazonas</option>
+                <option value="BA">BA — Bahia</option>
+                <option value="CE">CE — Ceará</option>
+                <option value="DF">DF — Distrito Federal</option>
+                <option value="ES">ES — Espírito Santo</option>
+                <option value="GO">GO — Goiás</option>
+                <option value="MA">MA — Maranhão</option>
+                <option value="MT">MT — Mato Grosso</option>
+                <option value="MS">MS — Mato Grosso do Sul</option>
+                <option value="MG">MG — Minas Gerais</option>
+                <option value="PA">PA — Pará</option>
+                <option value="PB">PB — Paraíba</option>
+                <option value="PR">PR — Paraná</option>
+                <option value="PE">PE — Pernambuco</option>
+                <option value="PI">PI — Piauí</option>
+                <option value="RJ">RJ — Rio de Janeiro</option>
+                <option value="RN">RN — Rio Grande do Norte</option>
+                <option value="RS">RS — Rio Grande do Sul</option>
+                <option value="RO">RO — Rondônia</option>
+                <option value="RR">RR — Roraima</option>
+                <option value="SC">SC — Santa Catarina</option>
+                <option value="SP">SP — São Paulo</option>
+                <option value="SE">SE — Sergipe</option>
+                <option value="TO">TO — Tocantins</option>
+              </select>
+            </div>
+            <div class="grupo-campo coluna-cheia">
+              <label for="logradouro">Logradouro</label>
+              <input type="text" id="logradouro" name="Logradouro" placeholder="Rua, Avenida...">
+            </div>
+            <div class="grupo-campo">
+              <label for="numero">Número</label>
+              <input type="text" id="numero" name="Numero" placeholder="123">
+            </div>
+            <div class="grupo-campo">
+              <label for="complemento">Complemento</label>
+              <input type="text" id="complemento" name="Complemento" placeholder="Apto, Sala">
+            </div>
+            <div class="grupo-campo">
+              <label for="bairro">Bairro</label>
+              <input type="text" id="bairro" name="Bairro" placeholder="Centro">
+            </div>
+            <div class="grupo-campo coluna-cheia">
+              <label for="cidade">Cidade</label>
+              <input type="text" id="cidade" name="Cidade" placeholder="São Paulo">
+            </div>
+          </div>
+          <div class="linha-botoes">
+            <button type="button" class="btn btn-secundario" onclick="irParaEtapa(2)">Voltar</button>
+            <button type="submit" class="btn btn-primario">Finalizar Cadastro</button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function alternarAba(visao) {
+      document.getElementById('visao-login').classList.add('oculto');
+      document.getElementById('visao-aluno').classList.add('oculto');
+      document.getElementById('visao-cadastro').classList.add('oculto');
+      document.querySelectorAll('.botao-aba').forEach(b => b.classList.remove('ativa'));
+
+      const textos = { login: 'Acesse sua conta para continuar', aluno: 'Bem-vindo de volta!', cadastro: 'Comece a gerir sua academia' };
+      document.getElementById('texto-cabecalho').innerText = textos[visao];
+
+      if (visao === 'login') {
+        document.getElementById('visao-login').classList.remove('oculto');
+        document.querySelectorAll('.botao-aba')[0].classList.add('ativa');
+      } else if (visao === 'aluno') {
+        document.getElementById('visao-aluno').classList.remove('oculto');
+        document.querySelectorAll('.botao-aba')[1].classList.add('ativa');
+      } else {
+        document.getElementById('visao-cadastro').classList.remove('oculto');
+        document.querySelectorAll('.botao-aba')[2].classList.add('ativa');
+        irParaEtapa(1);
+      }
+    }
+
+    function irParaEtapa(numero) {
+      ['etapa-1', 'etapa-2', 'etapa-3'].forEach(id => document.getElementById(id).classList.add('oculto'));
+      document.getElementById(`etapa-${numero}`).classList.remove('oculto');
+
+      document.querySelectorAll('.ponto-etapa').forEach((ponto, indice) => {
+        ponto.classList.remove('ativa', 'concluida');
+        if (indice + 1 === numero) ponto.classList.add('ativa');
+        if (indice + 1 < numero)   ponto.classList.add('concluida');
+      });
+    }
+
+    document.getElementById('cpf-administrador').addEventListener('input', e => {
+      let valor = e.target.value.replace(/\D/g, '').slice(0, 11);
+      e.target.value = valor.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    });
+
+    document.getElementById('cnpj-academia').addEventListener('input', e => {
+      let valor = e.target.value.replace(/\D/g, '').slice(0, 14);
+      e.target.value = valor.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    });
+
+    // Enter submete os forms de login normalmente
+    document.querySelector('#visao-login form').addEventListener('keydown', e => {
+      if (e.key === 'Enter') e.currentTarget.submit();
+    });
+    document.querySelector('#visao-aluno form').addEventListener('keydown', e => {
+      if (e.key === 'Enter') e.currentTarget.submit();
+    });
+
+    // Impede que Enter submeta o wizard antes da etapa final
+    document.querySelector('#visao-cadastro form').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && e.target.tagName === 'INPUT') e.preventDefault();
+    });
+
+    const cepInput = document.getElementById('cep');
+
+    cepInput.addEventListener('input', e => {
+      let valor = e.target.value.replace(/\D/g, '').slice(0, 8);
+      e.target.value = valor.replace(/(\d{5})(\d{3})/, '$1-$2');
+    });
+
+    cepInput.addEventListener('blur', async () => {
+      const cep = cepInput.value.replace(/\D/g, '');
+      if (cep.length !== 8) return;
+
+      const wrapper = document.getElementById('cep-wrapper');
+      wrapper.classList.add('carregando');
+
+      try {
+        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await res.json();
+
+        if (!data.erro) {
+          document.getElementById('logradouro').value = data.logradouro || '';
+          document.getElementById('bairro').value     = data.bairro     || '';
+          document.getElementById('cidade').value     = data.localidade  || '';
+
+          const selectEstado = document.getElementById('estado');
+          const opt = [...selectEstado.options].find(o => o.value === data.uf);
+          if (opt) selectEstado.value = data.uf;
+
+          document.getElementById('numero').focus();
+        }
+      } catch (_) {
+      } finally {
+        wrapper.classList.remove('carregando');
+      }
+    });
+
+    @if (ViewBag.ErroCadastro != null)
+    {
+        <text>alternarAba('cadastro');</text>
+    }
+    @if (ViewBag.ErroCliente != null)
+    {
+        <text>alternarAba('aluno');</text>
+    }
+  </script>
+
+</body>
+</html>

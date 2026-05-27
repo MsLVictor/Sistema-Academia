@@ -1,0 +1,148 @@
+﻿@{
+    Layout = null;
+    var cliente    = ViewBag.Cliente    as SistemaAcademia.Models.ClienteMatriculaViewModel;
+    var matriculas = ViewBag.Matriculas as IEnumerable<SistemaAcademia.Models.MatriculaListaViewModel> ?? Enumerable.Empty<SistemaAcademia.Models.MatriculaListaViewModel>();
+    string FormatCpf(string cpf) => cpf?.Length == 11 ? $"{cpf[..3]}.{cpf[3..6]}.{cpf[6..9]}-{cpf[9..]}" : cpf ?? "";
+    var cargo = Context.Session.GetString("UsuarioCargo");
+    bool podeMatricular = cargo == "Administrador" || cargo == "Recepcionista";
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Matrículas · FitManager</title>
+  <style>
+    :root {
+      --fundo: oklch(99% 0.002 240); --superficie: oklch(100% 0 0);
+      --texto: oklch(18% 0.012 250); --texto-muted: oklch(54% 0.012 250);
+      --borda: oklch(92% 0.005 250); --destaque: oklch(82% 0.18 145);
+      --destaque-suave: color-mix(in oklch, var(--destaque) 14%, transparent);
+      --fonte-corpo: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --fonte-mono: ui-monospace, 'JetBrains Mono', monospace;
+      --raio: 10px; --raio-lg: 16px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--fundo); color: var(--texto); font-family: var(--fonte-corpo); }
+    .topbar { background: var(--superficie); border-bottom: 1px solid var(--borda); padding: 14px 40px; display: flex; align-items: center; gap: 16px; }
+    .topbar-logo { font-family: 'Iowan Old Style', Georgia, serif; font-size: 18px; font-weight: 600; }
+    .topbar-sep { color: var(--borda); }
+    .topbar-titulo { font-size: 15px; font-weight: 600; flex-grow: 1; }
+    .topbar-usuario { font-size: 13px; color: var(--texto-muted); }
+    .topbar-voltar { font-size: 13px; color: var(--texto-muted); text-decoration: none; }
+    .topbar-voltar:hover { color: var(--texto); }
+    .conteudo { max-width: 900px; margin: 0 auto; padding: 40px; }
+    .cartao { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-lg); padding: 28px; margin-bottom: 20px; }
+    .aluno-info { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .aluno-nome { font-size: 20px; font-weight: 700; margin: 0 0 4px; }
+    .aluno-cpf { font-size: 13px; color: var(--texto-muted); font-family: var(--fonte-mono); margin: 0; }
+    .tabela { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .tabela th, .tabela td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--borda); }
+    .tabela th { color: var(--texto-muted); font-weight: 500; font-family: var(--fonte-mono); font-size: 11px; text-transform: uppercase; }
+    .tabela tr:last-child td { border-bottom: none; }
+    .tabela tbody tr:hover { background: var(--fundo); }
+    .etiqueta { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .etiqueta-ativa { background: #DCFCE7; color: #166534; }
+    .etiqueta-inativa { background: #F3F4F6; color: #6B7280; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie); color: var(--texto); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; font-family: inherit; }
+    .btn:hover { background: var(--fundo); }
+    .btn-primario { background: var(--destaque); border-color: var(--destaque); }
+    .btn-primario:hover { background: color-mix(in oklch, var(--destaque) 85%, white); }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+    .btn-perigo { color: oklch(35% 0.15 15); border-color: oklch(85% 0.08 15); }
+    .btn-perigo:hover { background: oklch(97% 0.02 15); }
+    .alerta { border-radius: var(--raio); padding: 12px 16px; font-size: 14px; margin-bottom: 20px; }
+    .alerta-sucesso { background: var(--destaque-suave); border: 1px solid color-mix(in oklch, var(--destaque) 30%, transparent); color: oklch(30% 0.1 145); }
+    .alerta-erro { background: oklch(97% 0.02 15); border: 1px solid oklch(85% 0.08 15); color: oklch(35% 0.15 15); }
+    .vazio { text-align: center; padding: 60px; color: var(--texto-muted); font-size: 15px; }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="topbar-logo" asp-controller="Home" asp-action="Index" style="text-decoration:none;color:inherit;">FitManager</a>
+  <span class="topbar-sep">·</span>
+  <span class="topbar-titulo">Matrículas</span>
+  <span class="topbar-usuario">@ViewData["Nome"]</span>
+  <a asp-controller="Cliente" asp-action="Listar" class="topbar-voltar">← Alunos</a>
+  @if (podeMatricular)
+  {
+    <a asp-controller="Matricula" asp-action="Cadastrar" asp-route-idCliente="@cliente?.IdCliente" class="btn btn-primario">+ Nova Matrícula</a>
+  }
+</header>
+
+<main class="conteudo">
+
+  @if (TempData["SucessoMatricula"] != null)
+  { <div class="alerta alerta-sucesso">@TempData["SucessoMatricula"]</div> }
+  @if (TempData["ErroMatricula"] != null)
+  { <div class="alerta alerta-erro">@TempData["ErroMatricula"]</div> }
+
+  <div class="cartao">
+    <div class="aluno-info">
+      <div>
+        <p class="aluno-nome">@cliente?.NomeCliente</p>
+        <p class="aluno-cpf">@FormatCpf(cliente?.CPF ?? "")</p>
+      </div>
+    </div>
+
+    @if (!matriculas.Any())
+    {
+      <div class="vazio">Nenhuma matrícula encontrada.</div>
+    }
+    else
+    {
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Modalidade</th>
+            <th>Plano</th>
+            <th>Parcela</th>
+            <th>Início</th>
+            <th>Status</th>
+            @if (podeMatricular) { <th></th> }
+          </tr>
+        </thead>
+        <tbody>
+          @foreach (var m in matriculas)
+          {
+            <tr>
+              <td>
+                <a asp-controller="Pagamento" asp-action="Listar" asp-route-idCliente="@cliente?.IdCliente"
+                   class="btn btn-sm" style="margin-bottom: 4px;">Pagamentos</a>
+              </td>
+              <td><strong>@m.NomeModalidade</strong></td>
+              <td>@m.NomePlano (@m.Meses @(m.Meses == 1 ? "mês" : "meses"))</td>
+              <td>R$ @m.ValorParcela.ToString("N2")</td>
+              <td>@m.DataInicio.ToString("dd/MM/yyyy")</td>
+              <td>
+                @if (m.Status == "Ativa")
+                { <span class="etiqueta etiqueta-ativa">Ativa</span> }
+                else
+                { <span class="etiqueta etiqueta-inativa">Inativa</span> }
+              </td>
+              @if (podeMatricular)
+              {
+                <td>
+                  @if (m.Status == "Ativa")
+                  {
+                    <form method="post" asp-action="Cancelar"
+                      onsubmit="return confirm('Cancelar esta matrícula? As parcelas futuras serão canceladas.')">
+                      <input type="hidden" name="id"         value="@m.Id" />
+                      <input type="hidden" name="idCliente"  value="@cliente?.IdCliente" />
+                      <button type="submit" class="btn btn-sm btn-perigo">Cancelar</button>
+                    </form>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+</main>
+</body>
+</html>

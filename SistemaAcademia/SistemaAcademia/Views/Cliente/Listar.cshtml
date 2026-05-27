@@ -1,0 +1,181 @@
+﻿@{
+    Layout = null;
+    string FormatCpf(string cpf) => cpf?.Length == 11
+        ? $"{cpf[..3]}.{cpf[3..6]}.{cpf[6..9]}-{cpf[9..]}" : cpf ?? "";
+    var statusFiltro = ViewBag.Status?.ToString() ?? "";
+    var buscaFiltro  = ViewBag.Busca?.ToString()  ?? "";
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gestão de Alunos · FitManager</title>
+  <style>
+    :root {
+      --fundo:          oklch(99% 0.002 240);
+      --superficie:     oklch(100% 0 0);
+      --texto:          oklch(18% 0.012 250);
+      --texto-muted:    oklch(54% 0.012 250);
+      --borda:          oklch(92% 0.005 250);
+      --destaque:       oklch(82% 0.18 145);
+      --destaque-suave: color-mix(in oklch, var(--destaque) 14%, transparent);
+      --fonte-titulo: 'Iowan Old Style', 'Charter', Georgia, serif;
+      --fonte-corpo:  -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --fonte-mono:   ui-monospace, 'JetBrains Mono', monospace;
+      --raio: 10px; --raio-lg: 16px; --gap-md: 20px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--fundo); color: var(--texto); font-family: var(--fonte-corpo); }
+
+    .topbar { background: var(--superficie); border-bottom: 1px solid var(--borda); padding: 14px 40px; display: flex; align-items: center; gap: 16px; }
+    .topbar-logo { font-family: var(--fonte-titulo); font-size: 18px; font-weight: 600; }
+    .topbar-sep { color: var(--borda); user-select: none; }
+    .topbar-titulo { font-size: 15px; font-weight: 600; flex-grow: 1; }
+    .topbar-usuario { font-size: 13px; color: var(--texto-muted); }
+    .topbar-voltar { font-size: 13px; color: var(--texto-muted); text-decoration: none; }
+    .topbar-voltar:hover { color: var(--texto); }
+
+    .conteudo { max-width: 1200px; margin: 0 auto; padding: 40px; }
+
+    .cartao { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-lg); padding: 28px; margin-bottom: var(--gap-md); }
+
+    .tabela-dados { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .tabela-dados th, .tabela-dados td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--borda); }
+    .tabela-dados th { color: var(--texto-muted); font-weight: 500; font-family: var(--fonte-mono); font-size: 11px; text-transform: uppercase; }
+    .tabela-dados tr:last-child td { border-bottom: none; }
+    .tabela-dados tbody tr:hover { background: var(--fundo); }
+
+    .etiqueta { padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .etiqueta-sucesso { background: #DCFCE7; color: #166534; }
+    .etiqueta-erro    { background: #FEE2E2; color: #991B1B; }
+
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie); color: var(--texto); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; transition: background 0.15s; font-family: inherit; }
+    .btn:hover { background: var(--fundo); }
+    .btn-primario { background: var(--destaque); border-color: var(--destaque); }
+    .btn-primario:hover { background: color-mix(in oklch, var(--destaque) 85%, white); }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+    .btn-perigo { color: oklch(35% 0.15 15); border-color: oklch(85% 0.08 15); }
+    .btn-perigo:hover { background: oklch(97% 0.02 15); }
+
+    .alerta { border-radius: var(--raio); padding: 12px 16px; font-size: 14px; margin-bottom: 20px; }
+    .alerta-sucesso { background: var(--destaque-suave); border: 1px solid color-mix(in oklch, var(--destaque) 30%, transparent); color: oklch(30% 0.1 145); }
+    .alerta-erro    { background: oklch(97% 0.02 15); border: 1px solid oklch(85% 0.08 15); color: oklch(35% 0.15 15); }
+
+    .vazio { text-align: center; padding: 60px 20px; color: var(--texto-muted); font-size: 15px; }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <a class="topbar-logo" asp-controller="Home" asp-action="Index" style="text-decoration:none;color:inherit;">FitManager</a>
+    <span class="topbar-sep">·</span>
+    <span class="topbar-titulo">Gestão de Alunos</span>
+    <span class="topbar-usuario">@ViewData["Nome"]</span>
+    <a asp-controller="Home" asp-action="@ViewData["PainelAction"]" class="topbar-voltar">← Painel</a>
+    <a asp-controller="Cliente" asp-action="Cadastrar" class="btn btn-primario">+ Cadastrar Aluno</a>
+  </header>
+
+  <main class="conteudo">
+
+    @if (TempData["SucessoCliente"] != null)
+    {
+        <div class="alerta alerta-sucesso">@TempData["SucessoCliente"]</div>
+    }
+    @if (TempData["ErroCliente"] != null)
+    {
+        <div class="alerta alerta-erro">@TempData["ErroCliente"]</div>
+    }
+
+    <div class="cartao">
+      <form method="get" style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
+        <input type="text" name="busca" value="@buscaFiltro"
+          placeholder="Buscar por nome ou CPF..."
+          style="flex-grow: 1; min-width: 200px; padding: 10px 16px; border: 1px solid var(--borda); border-radius: var(--raio); font-size: 14px; font-family: inherit;" />
+        <select name="status"
+          style="padding: 10px 16px; border: 1px solid var(--borda); border-radius: var(--raio); font-size: 14px; font-family: inherit; background: var(--superficie);">
+          @if (statusFiltro == "") { <option value="" selected>Todos os Status</option> } else { <option value="">Todos os Status</option> }
+          @if (statusFiltro == "A") { <option value="A" selected>Ativos</option> } else { <option value="A">Ativos</option> }
+          @if (statusFiltro == "I") { <option value="I" selected>Inativos</option> } else { <option value="I">Inativos</option> }
+        </select>
+        <button type="submit" class="btn">Filtrar</button>
+        @if (!string.IsNullOrEmpty(buscaFiltro) || !string.IsNullOrEmpty(statusFiltro))
+        {
+            <a asp-controller="Cliente" asp-action="Listar" class="btn">Limpar</a>
+        }
+      </form>
+
+      @{
+          var clientes = ViewBag.Clientes as IEnumerable<SistemaAcademia.Models.ClienteListaViewModel>;
+      }
+      @if (clientes == null || !clientes.Any())
+      {
+          <div class="vazio">Nenhum aluno encontrado.</div>
+      }
+      else
+      {
+          <table class="tabela-dados">
+            <thead>
+              <tr>
+                <th>Aluno</th>
+                <th>CPF</th>
+                <th>Telefone</th>
+                <th>Nascimento</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach (var c in clientes)
+              {
+                  <tr>
+                    <td>
+                      <strong>@c.Nome</strong><br />
+                      <span style="font-size: 11px; color: var(--texto-muted);">@c.Email</span>
+                    </td>
+                    <td style="font-family: var(--fonte-mono); font-size: 13px;">@FormatCpf(c.CPF)</td>
+                    <td>@(string.IsNullOrEmpty(c.Telefone) ? "—" : c.Telefone)</td>
+                    <td>@c.DataNascimento.ToString("dd/MM/yyyy")</td>
+                    <td>
+                      @if (c.Ativo == "A")
+                      { <span class="etiqueta etiqueta-sucesso">Ativo</span> }
+                      else
+                      { <span class="etiqueta etiqueta-erro">Inativo</span> }
+                    </td>
+                    <td style="display: flex; gap: 6px; flex-wrap: wrap;">
+                      <a asp-controller="Matricula" asp-action="Listar" asp-route-idCliente="@c.Id"
+                         class="btn btn-sm">Matrículas</a>
+                      <a asp-controller="Pagamento" asp-action="Listar" asp-route-idCliente="@c.Id"
+                         class="btn btn-sm" style="color: oklch(30% 0.1 145); border-color: color-mix(in oklch, oklch(82% 0.18 145) 50%, transparent);">Pagamentos</a>
+                      <a asp-controller="CheckIn" asp-action="Historico" asp-route-idCliente="@c.Id"
+                         class="btn btn-sm">Check-ins</a>
+                      <a asp-controller="Cliente" asp-action="Editar" asp-route-id="@c.Id"
+                         class="btn btn-sm">Editar</a>
+                      @if (c.Ativo == "A")
+                      {
+                          <form asp-controller="Cliente" asp-action="AlterarStatus" method="post" style="display:inline;">
+                            <input type="hidden" name="id"   value="@c.Id" />
+                            <input type="hidden" name="ativo" value="I" />
+                            <button type="submit" class="btn btn-sm btn-perigo">Inativar</button>
+                          </form>
+                      }
+                      else
+                      {
+                          <form asp-controller="Cliente" asp-action="AlterarStatus" method="post" style="display:inline;">
+                            <input type="hidden" name="id"   value="@c.Id" />
+                            <input type="hidden" name="ativo" value="A" />
+                            <button type="submit" class="btn btn-sm" style="color: oklch(30% 0.1 145);">Reativar</button>
+                          </form>
+                      }
+                    </td>
+                  </tr>
+              }
+            </tbody>
+          </table>
+      }
+    </div>
+
+  </main>
+
+</body>
+</html>

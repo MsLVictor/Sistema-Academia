@@ -1,0 +1,180 @@
+﻿@{
+    Layout = null;
+    var planos = ViewBag.Planos as IEnumerable<SistemaAcademia.Models.PlanoViewModel> ?? Enumerable.Empty<SistemaAcademia.Models.PlanoViewModel>();
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Planos · FitManager</title>
+  <style>
+    :root {
+      --fundo: oklch(99% 0.002 240); --superficie: oklch(100% 0 0);
+      --texto: oklch(18% 0.012 250); --texto-muted: oklch(54% 0.012 250);
+      --borda: oklch(92% 0.005 250); --destaque: oklch(82% 0.18 145);
+      --destaque-suave: color-mix(in oklch, var(--destaque) 14%, transparent);
+      --fonte-corpo: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --fonte-mono: ui-monospace, 'JetBrains Mono', monospace;
+      --raio: 10px; --raio-lg: 16px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--fundo); color: var(--texto); font-family: var(--fonte-corpo); }
+    .topbar { background: var(--superficie); border-bottom: 1px solid var(--borda); padding: 14px 40px; display: flex; align-items: center; gap: 16px; }
+    .topbar-logo { font-family: 'Iowan Old Style', Georgia, serif; font-size: 18px; font-weight: 600; }
+    .topbar-sep { color: var(--borda); }
+    .topbar-titulo { font-size: 15px; font-weight: 600; flex-grow: 1; }
+    .topbar-usuario { font-size: 13px; color: var(--texto-muted); }
+    .topbar-voltar { font-size: 13px; color: var(--texto-muted); text-decoration: none; }
+    .topbar-voltar:hover { color: var(--texto); }
+    .conteudo { max-width: 900px; margin: 0 auto; padding: 40px; }
+    .cartao { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-lg); padding: 28px; margin-bottom: 20px; }
+    .secao-titulo { font-size: 16px; font-weight: 700; margin: 0 0 20px; }
+    .tabela { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .tabela th, .tabela td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--borda); }
+    .tabela th { color: var(--texto-muted); font-weight: 500; font-family: var(--fonte-mono); font-size: 11px; text-transform: uppercase; }
+    .tabela tr:last-child td { border-bottom: none; }
+    .tabela tbody tr:hover { background: var(--fundo); }
+    .campo { width: 100%; padding: 10px 14px; border: 1px solid var(--borda); border-radius: var(--raio); font-size: 14px; font-family: inherit; background: var(--fundo); }
+    .campo:focus { outline: none; border-color: var(--destaque); }
+    .grade { display: grid; grid-template-columns: 1fr 120px 160px; gap: 12px; align-items: end; }
+    .rotulo { font-size: 12px; font-weight: 600; color: var(--texto-muted); margin-bottom: 6px; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie); color: var(--texto); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; font-family: inherit; }
+    .btn:hover { background: var(--fundo); }
+    .btn-primario { background: var(--destaque); border-color: var(--destaque); }
+    .btn-primario:hover { background: color-mix(in oklch, var(--destaque) 85%, white); }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+    .btn-perigo { color: oklch(35% 0.15 15); border-color: oklch(85% 0.08 15); }
+    .btn-perigo:hover { background: oklch(97% 0.02 15); }
+    .alerta { border-radius: var(--raio); padding: 12px 16px; font-size: 14px; margin-bottom: 20px; }
+    .alerta-sucesso { background: var(--destaque-suave); border: 1px solid color-mix(in oklch, var(--destaque) 30%, transparent); color: oklch(30% 0.1 145); }
+    .alerta-erro { background: oklch(97% 0.02 15); border: 1px solid oklch(85% 0.08 15); color: oklch(35% 0.15 15); }
+    .vazio { text-align: center; padding: 40px; color: var(--texto-muted); font-size: 14px; }
+    dialog { border: 1px solid var(--borda); border-radius: var(--raio-lg); padding: 28px; max-width: 480px; width: 100%; }
+    dialog::backdrop { background: oklch(0% 0 0 / 40%); }
+    .dialog-titulo { font-size: 16px; font-weight: 700; margin: 0 0 20px; }
+    .dialog-acoes { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="topbar-logo" asp-controller="Home" asp-action="Index" style="text-decoration:none;color:inherit;">FitManager</a>
+  <span class="topbar-sep">·</span>
+  <span class="topbar-titulo">Planos</span>
+  <span class="topbar-usuario">@ViewData["Nome"]</span>
+  <a href="javascript:history.back()" class="topbar-voltar">← Painel</a>
+  <a asp-controller="Modalidade" asp-action="Listar" class="btn">Modalidades</a>
+</header>
+
+<main class="conteudo">
+
+  @if (TempData["SucessoPlano"] != null)
+  { <div class="alerta alerta-sucesso">@TempData["SucessoPlano"]</div> }
+  @if (TempData["ErroPlano"] != null)
+  { <div class="alerta alerta-erro">@TempData["ErroPlano"]</div> }
+
+  <div class="cartao">
+    <p class="secao-titulo">Novo Plano</p>
+    <form method="post" asp-action="Cadastrar">
+      <div class="grade">
+        <div>
+          <div class="rotulo">Nome do plano</div>
+          <input class="campo" name="Nome" placeholder="Ex: Mensal, Trimestral..." required />
+        </div>
+        <div>
+          <div class="rotulo">Duração (meses)</div>
+          <input class="campo" name="TempoPlano" type="number" min="1" max="12" placeholder="3" required />
+        </div>
+        <div>
+          <div class="rotulo">Desconto (%)</div>
+          <input class="campo" name="PercentualDesconto" type="number" min="0" max="100" step="0.01" placeholder="0" required />
+        </div>
+      </div>
+      <div style="margin-top: 16px; text-align: right;">
+        <button type="submit" class="btn btn-primario">+ Cadastrar Plano</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="cartao">
+    <p class="secao-titulo">Planos cadastrados</p>
+    @if (!planos.Any())
+    {
+      <div class="vazio">Nenhum plano cadastrado ainda.</div>
+    }
+    else
+    {
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Duração</th>
+            <th>Desconto</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @foreach (var p in planos)
+          {
+            <tr>
+              <td><strong>@p.Nome</strong></td>
+              <td>@int.Parse(p.TempoPlano) @(int.Parse(p.TempoPlano) == 1 ? "mês" : "meses")</td>
+              <td>@p.PercentualDesconto.ToString("0.##")%</td>
+              <td style="text-align: right; white-space: nowrap;">
+                <button class="btn btn-sm"
+                  onclick="abrirEditar(@p.Id, '@p.Nome.Replace("'","\\'")', '@p.TempoPlano', @p.PercentualDesconto.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))">
+                  Editar
+                </button>
+                <form method="post" asp-action="Excluir" style="display:inline"
+                  onsubmit="return confirm('Excluir o plano @p.Nome?')">
+                  <input type="hidden" name="id" value="@p.Id" />
+                  <button type="submit" class="btn btn-sm btn-perigo">Excluir</button>
+                </form>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+</main>
+
+<dialog id="dialogEditar">
+  <p class="dialog-titulo">Editar Plano</p>
+  <form method="post" asp-action="Editar">
+    <input type="hidden" id="editId" name="Id" />
+    <div style="margin-bottom: 14px;">
+      <div class="rotulo">Nome</div>
+      <input class="campo" id="editNome" name="Nome" required />
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+      <div>
+        <div class="rotulo">Duração (meses)</div>
+        <input class="campo" id="editTempo" name="TempoPlano" type="number" min="1" max="12" required />
+      </div>
+      <div>
+        <div class="rotulo">Desconto (%)</div>
+        <input class="campo" id="editDesconto" name="PercentualDesconto" type="number" min="0" max="100" step="0.01" required />
+      </div>
+    </div>
+    <div class="dialog-acoes">
+      <button type="button" class="btn" onclick="document.getElementById('dialogEditar').close()">Cancelar</button>
+      <button type="submit" class="btn btn-primario">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  function abrirEditar(id, nome, tempo, desconto) {
+    document.getElementById('editId').value       = id;
+    document.getElementById('editNome').value     = nome;
+    document.getElementById('editTempo').value    = parseInt(tempo);
+    document.getElementById('editDesconto').value = desconto;
+    document.getElementById('dialogEditar').showModal();
+  }
+</script>
+
+</body>
+</html>
