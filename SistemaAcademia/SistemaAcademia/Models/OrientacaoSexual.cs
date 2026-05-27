@@ -1,7 +1,7 @@
 namespace SistemaAcademia.Models;
 
-public class OrientacaoSexual(int id, string nome)
+public class OrientacaoSexual(long id, string nome)
 {
-    public int    Id   { get; } = id;
+    public long   Id   { get; } = id;
     public string Nome { get; } = nome;
 }

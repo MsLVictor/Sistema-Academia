@@ -13,8 +13,8 @@ public class MatriculaController : Controller
     private readonly ModalidadeService  _modalidadeService  = new ModalidadeService();
     private readonly PagamentoService   _pagamentoService   = new PagamentoService();
 
-    private int GetIdAcademia() =>
-        int.Parse(HttpContext.Session.GetString("UsuarioIdAcademia") ?? "0");
+    private long GetIdAcademia() =>
+        long.Parse(HttpContext.Session.GetString("UsuarioIdAcademia") ?? "0");
 
     private bool CargoPermitidoMatricular()
     {
@@ -37,11 +37,11 @@ public class MatriculaController : Controller
         };
 
     [HttpGet]
-    public IActionResult Cadastrar(int idCliente)
+    public IActionResult Cadastrar(long idCliente)
     {
         if (!CargoPermitidoMatricular()) return RedirectToAction("Index", "Login");
 
-        int idAcademia = GetIdAcademia();
+        long idAcademia = GetIdAcademia();
         var cliente = _matriculaService.BuscarCliente(idCliente, idAcademia);
         if (cliente is null) return RedirectToAction("Listar", "Cliente");
 
@@ -59,7 +59,7 @@ public class MatriculaController : Controller
     {
         if (!CargoPermitidoMatricular()) return RedirectToAction("Index", "Login");
 
-        int idAcademia = GetIdAcademia();
+        long idAcademia = GetIdAcademia();
         var (sucesso, erro) = _matriculaService.Matricular(dados, idAcademia);
 
         if (!sucesso)
@@ -73,11 +73,11 @@ public class MatriculaController : Controller
     }
 
     [HttpGet]
-    public IActionResult Listar(int idCliente)
+    public IActionResult Listar(long idCliente)
     {
         if (!CargoPermitidoVisualizar()) return RedirectToAction("Index", "Login");
 
-        int idAcademia = GetIdAcademia();
+        long idAcademia = GetIdAcademia();
         var cliente = _matriculaService.BuscarCliente(idCliente, idAcademia);
         if (cliente is null) return RedirectToAction("Listar", "Cliente");
 
@@ -89,7 +89,7 @@ public class MatriculaController : Controller
     }
 
     [HttpPost]
-    public IActionResult Cancelar(int id, int idCliente)
+    public IActionResult Cancelar(long id, long idCliente)
     {
         if (!CargoPermitidoMatricular()) return RedirectToAction("Index", "Login");
 

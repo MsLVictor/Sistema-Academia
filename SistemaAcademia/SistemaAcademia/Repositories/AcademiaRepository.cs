@@ -20,10 +20,10 @@ public class AcademiaRepository
 
         try
         {
-            int identificadorEndereco = InserirEndereco(endereco, conexao, transacao);
-            int identificadorAcademia = InserirAcademia(academia, identificadorEndereco, conexao, transacao);
+            long identificadorEndereco = InserirEndereco(endereco, conexao, transacao);
+            long identificadorAcademia = InserirAcademia(academia, identificadorEndereco, conexao, transacao);
 
-            int identificadorCargoAdministrador = BuscarIdentificadorCargo("Administrador", conexao, transacao);
+            long identificadorCargoAdministrador = BuscarIdentificadorCargo("Administrador", conexao, transacao);
             InserirUsuarioAdministrador(administrador, identificadorAcademia, identificadorCargoAdministrador, conexao, transacao);
 
             transacao.Commit();
@@ -35,7 +35,7 @@ public class AcademiaRepository
         }
     }
 
-    private int InserirEndereco(Endereco endereco, SqlConnection conexao, SqlTransaction transacao)
+    private long InserirEndereco(Endereco endereco, SqlConnection conexao, SqlTransaction transacao)
     {
         string sql = @"
             INSERT INTO Endereco (Logradouro, Numero, Complemento, Bairro, CEP, Cidade, Estado)
@@ -51,10 +51,10 @@ public class AcademiaRepository
         comando.Parameters.AddWithValue("@cidade",      endereco.Cidade);
         comando.Parameters.AddWithValue("@estado",      endereco.Estado);
 
-        return (int)comando.ExecuteScalar()!;
+        return (long)comando.ExecuteScalar()!;
     }
 
-    private int InserirAcademia(Academia academia, int identificadorEndereco, SqlConnection conexao, SqlTransaction transacao)
+    private long InserirAcademia(Academia academia, long identificadorEndereco, SqlConnection conexao, SqlTransaction transacao)
     {
         string sql = @"
             INSERT INTO Academia (IdEndereco, Nome, CNPJ, Email)
@@ -67,10 +67,10 @@ public class AcademiaRepository
         comando.Parameters.AddWithValue("@cnpj",       academia.CNPJ);
         comando.Parameters.AddWithValue("@email",      academia.Email);
 
-        return (int)comando.ExecuteScalar()!;
+        return (long)comando.ExecuteScalar()!;
     }
 
-    private int BuscarIdentificadorCargo(string nomeCargo, SqlConnection conexao, SqlTransaction transacao)
+    private long BuscarIdentificadorCargo(string nomeCargo, SqlConnection conexao, SqlTransaction transacao)
     {
         string sql = "SELECT Id FROM Cargo WHERE Nome = @nomeCargo";
 
@@ -82,10 +82,10 @@ public class AcademiaRepository
         if (resultado is null)
             throw new InvalidOperationException($"Cargo '{nomeCargo}' não encontrado. Execute o script de inserts do banco de dados.");
 
-        return (int)resultado;
+        return (long)resultado;
     }
 
-    private void InserirUsuarioAdministrador(Usuario administrador, int identificadorAcademia, int identificadorCargo, SqlConnection conexao, SqlTransaction transacao)
+    private void InserirUsuarioAdministrador(Usuario administrador, long identificadorAcademia, long identificadorCargo, SqlConnection conexao, SqlTransaction transacao)
     {
         byte[] hashSenha = SHA256.HashData(Encoding.UTF8.GetBytes(administrador.Senha.Trim()));
 

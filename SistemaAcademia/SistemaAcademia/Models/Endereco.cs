@@ -2,7 +2,7 @@ namespace SistemaAcademia.Models;
 
 public class Endereco(string logradouro, string numero, string complemento, string bairro, string cep, string cidade, string estado)
 {
-    public int Id { get; init; }
+    public long Id { get; init; }
     public string Logradouro { get; } = logradouro;
     public string Numero { get; } = numero;
     public string Complemento { get; } = complemento;

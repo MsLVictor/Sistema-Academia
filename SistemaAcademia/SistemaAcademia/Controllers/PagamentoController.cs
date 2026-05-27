@@ -11,8 +11,8 @@ public class PagamentoController : Controller
     private readonly PagamentoService  _pagamentoService  = new PagamentoService();
     private readonly MatriculaService  _matriculaService  = new MatriculaService();
 
-    private int GetIdAcademia() =>
-        int.Parse(HttpContext.Session.GetString("UsuarioIdAcademia") ?? "0");
+    private long GetIdAcademia() =>
+        long.Parse(HttpContext.Session.GetString("UsuarioIdAcademia") ?? "0");
 
     private bool CargoPermitidoVisualizar()
     {
@@ -35,11 +35,11 @@ public class PagamentoController : Controller
         };
 
     [HttpGet]
-    public IActionResult Listar(int idCliente)
+    public IActionResult Listar(long idCliente)
     {
         if (!CargoPermitidoVisualizar()) return RedirectToAction("Index", "Login");
 
-        int idAcademia = GetIdAcademia();
+        long idAcademia = GetIdAcademia();
         var cliente = _matriculaService.BuscarCliente(idCliente, idAcademia);
         if (cliente is null) return RedirectToAction("Listar", "Cliente");
 
@@ -57,7 +57,7 @@ public class PagamentoController : Controller
     {
         if (!CargoPermitidoRegistrar()) return RedirectToAction("Index", "Login");
 
-        int idAcademia = GetIdAcademia();
+        long idAcademia = GetIdAcademia();
         var (sucesso, erro) = _pagamentoService.Registrar(dados, idAcademia);
 
         TempData[sucesso ? "SucessoPagamento" : "ErroPagamento"] =

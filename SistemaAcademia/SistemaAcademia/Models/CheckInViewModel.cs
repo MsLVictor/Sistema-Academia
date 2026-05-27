@@ -11,7 +11,7 @@ public class CheckInResultado
 
 public class CheckInPresencaViewModel
 {
-    public int      IdCheckIn         { get; set; }
+    public long     IdCheckIn         { get; set; }
     public string   NomeCliente       { get; set; } = string.Empty;
     public DateTime DataHoraEntrada   { get; set; }
     public string   NomeRecepcionista { get; set; } = string.Empty;
@@ -19,7 +19,7 @@ public class CheckInPresencaViewModel
 
 public class CheckInHistoricoViewModel
 {
-    public int       Id                { get; set; }
+    public long      Id                { get; set; }
     public DateTime  DataHoraEntrada   { get; set; }
     public DateTime? DataHoraSaida     { get; set; }
     public string    NomeRecepcionista { get; set; } = string.Empty;

@@ -9,7 +9,7 @@ public class ModalidadeRepository
         Environment.GetEnvironmentVariable("CONNECTION_STRING")
         ?? @"Data Source=DESKTOP-5V5TG5F\SQLEXPRESS;Initial Catalog=SistemaAcademia;Integrated Security=True;Persist Security Info=False;Pooling=False;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Application Name='SQL Server Management Studio';Command Timeout=0";
 
-    public IEnumerable<ModalidadeViewModel> Listar(int idAcademia)
+    public IEnumerable<ModalidadeViewModel> Listar(long idAcademia)
     {
         string sql = @"
             SELECT Id, Nome, ValorModalidade
@@ -29,7 +29,7 @@ public class ModalidadeRepository
         {
             lista.Add(new ModalidadeViewModel
             {
-                Id              = (int)reader["Id"],
+                Id              = (long)reader["Id"],
                 Nome            = reader["Nome"].ToString(),
                 ValorModalidade = (decimal)reader["ValorModalidade"]
             });
@@ -37,7 +37,7 @@ public class ModalidadeRepository
         return lista;
     }
 
-    public void Cadastrar(ModalidadeViewModel dados, int idAcademia)
+    public void Cadastrar(ModalidadeViewModel dados, long idAcademia)
     {
         string sql = @"
             INSERT INTO Modalidade (IdAcademia, Nome, ValorModalidade)
@@ -53,7 +53,7 @@ public class ModalidadeRepository
         comando.ExecuteNonQuery();
     }
 
-    public void Editar(ModalidadeViewModel dados, int idAcademia)
+    public void Editar(ModalidadeViewModel dados, long idAcademia)
     {
         string sql = @"
             UPDATE Modalidade
@@ -71,7 +71,7 @@ public class ModalidadeRepository
         comando.ExecuteNonQuery();
     }
 
-    public bool Excluir(int id, int idAcademia)
+    public bool Excluir(long id, long idAcademia)
     {
         string sql = @"
             IF NOT EXISTS (SELECT 1 FROM MatriculaCliente WHERE IdModalidade = @id)

@@ -9,7 +9,7 @@ public class PlanoRepository
         Environment.GetEnvironmentVariable("CONNECTION_STRING")
         ?? @"Data Source=DESKTOP-5V5TG5F\SQLEXPRESS;Initial Catalog=SistemaAcademia;Integrated Security=True;Persist Security Info=False;Pooling=False;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Application Name='SQL Server Management Studio';Command Timeout=0";
 
-    public IEnumerable<PlanoViewModel> Listar(int idAcademia)
+    public IEnumerable<PlanoViewModel> Listar(long idAcademia)
     {
         string sql = @"
             SELECT Id, Nome, TempoPlano, PercentualDesconto
@@ -29,7 +29,7 @@ public class PlanoRepository
         {
             lista.Add(new PlanoViewModel
             {
-                Id                 = (int)reader["Id"],
+                Id                 = (long)reader["Id"],
                 Nome               = reader["Nome"].ToString(),
                 TempoPlano         = reader["TempoPlano"].ToString(),
                 PercentualDesconto = (float)(double)reader["PercentualDesconto"]
@@ -38,7 +38,7 @@ public class PlanoRepository
         return lista;
     }
 
-    public void Cadastrar(PlanoViewModel dados, int idAcademia)
+    public void Cadastrar(PlanoViewModel dados, long idAcademia)
     {
         string sql = @"
             INSERT INTO Plano (IdAcademia, Nome, TempoPlano, PercentualDesconto)
@@ -55,7 +55,7 @@ public class PlanoRepository
         comando.ExecuteNonQuery();
     }
 
-    public void Editar(PlanoViewModel dados, int idAcademia)
+    public void Editar(PlanoViewModel dados, long idAcademia)
     {
         string sql = @"
             UPDATE Plano
@@ -74,7 +74,7 @@ public class PlanoRepository
         comando.ExecuteNonQuery();
     }
 
-    public bool Excluir(int id, int idAcademia)
+    public bool Excluir(long id, long idAcademia)
     {
         string sql = @"
             IF NOT EXISTS (SELECT 1 FROM MatriculaCliente WHERE IdPlano = @id)

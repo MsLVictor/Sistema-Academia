@@ -7,7 +7,7 @@ public class Usuario : Pessoa
         Cargo = cargo;
     }
 
-    public int   IdAcademia { get; init; }
+    public long  IdAcademia { get; init; }
     public Cargo Cargo      { get; private set; }
 
     public void MudarCargo(Cargo novoCargo) => Cargo = novoCargo;

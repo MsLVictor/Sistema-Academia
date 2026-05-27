@@ -28,7 +28,7 @@ public class HomeController : Controller
         if (HttpContext.Session.GetString("UsuarioCargo") != "Administrador")
             return RedirectToAction("Index", "Login");
 
-        int idAcademia = int.Parse(HttpContext.Session.GetString("UsuarioIdAcademia") ?? "0");
+        long idAcademia = long.Parse(HttpContext.Session.GetString("UsuarioIdAcademia") ?? "0");
 
         ViewData["Nome"]     = HttpContext.Session.GetString("UsuarioNome");
         ViewBag.Cargos       = new CargoRepository().BuscarTodos();

@@ -9,7 +9,7 @@ public class MatriculaRepository
         Environment.GetEnvironmentVariable("CONNECTION_STRING")
         ?? @"Data Source=DESKTOP-5V5TG5F\SQLEXPRESS;Initial Catalog=SistemaAcademia;Integrated Security=True;Persist Security Info=False;Pooling=False;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Application Name='SQL Server Management Studio';Command Timeout=0";
 
-    public bool TemMatriculaAtiva(int idCliente)
+    public bool TemMatriculaAtiva(long idCliente)
     {
         string sql = @"
             SELECT COUNT(1) FROM MatriculaCliente
@@ -23,7 +23,7 @@ public class MatriculaRepository
         return (int)comando.ExecuteScalar() > 0;
     }
 
-    public ClienteMatriculaViewModel BuscarCliente(int idCliente, int idAcademia)
+    public ClienteMatriculaViewModel BuscarCliente(long idCliente, long idAcademia)
     {
         string sql = @"
             SELECT Id, Nome, CPF FROM Cliente
@@ -40,13 +40,13 @@ public class MatriculaRepository
 
         return new ClienteMatriculaViewModel
         {
-            IdCliente   = (int)reader["Id"],
+            IdCliente   = (long)reader["Id"],
             NomeCliente = reader["Nome"].ToString(),
             CPF         = reader["CPF"].ToString()
         };
     }
 
-    public IEnumerable<MatriculaListaViewModel> ListarPorCliente(int idCliente, int idAcademia)
+    public IEnumerable<MatriculaListaViewModel> ListarPorCliente(long idCliente, long idAcademia)
     {
         string sql = @"
             SELECT mc.Id, mo.Nome AS NomeModalidade, pl.Nome AS NomePlano,
@@ -73,7 +73,7 @@ public class MatriculaRepository
         {
             lista.Add(new MatriculaListaViewModel
             {
-                Id             = (int)reader["Id"],
+                Id             = (long)reader["Id"],
                 NomeModalidade = reader["NomeModalidade"].ToString(),
                 NomePlano      = reader["NomePlano"].ToString(),
                 Meses          = (int)reader["Meses"],
@@ -93,7 +93,6 @@ public class MatriculaRepository
 
         try
         {
-            // 1. Insert matrícula
             string sqlMatricula = @"
                 INSERT INTO MatriculaCliente (IdCliente, IdModalidade, IdPlano, DataInicio, StatusSituacao)
                 VALUES (@idCliente, @idModalidade, @idPlano, @dataInicio, 'A');
@@ -105,22 +104,20 @@ public class MatriculaRepository
             cmdMatricula.Parameters.AddWithValue("@idPlano",      dados.IdPlano);
             cmdMatricula.Parameters.AddWithValue("@dataInicio",   dados.DataInicio);
 
-            int idMatricula = Convert.ToInt32(cmdMatricula.ExecuteScalar());
+            long idMatricula = Convert.ToInt64(cmdMatricula.ExecuteScalar());
 
-            // 2. Buscar ids de status
             string sqlStatus = "SELECT Id, Nome FROM StatusPagamento WHERE Nome IN ('Pendente','Pago')";
             using SqlCommand cmdStatus = new(sqlStatus, conexao, transacao);
-            int idStatusPendente = 0, idStatusPago = 0;
+            long idStatusPendente = 0, idStatusPago = 0;
             using (var rStatus = cmdStatus.ExecuteReader())
             {
                 while (rStatus.Read())
                 {
-                    if (rStatus["Nome"].ToString() == "Pendente") idStatusPendente = (int)rStatus["Id"];
-                    else if (rStatus["Nome"].ToString() == "Pago") idStatusPago     = (int)rStatus["Id"];
+                    if (rStatus["Nome"].ToString() == "Pendente") idStatusPendente = (long)rStatus["Id"];
+                    else if (rStatus["Nome"].ToString() == "Pago") idStatusPago     = (long)rStatus["Id"];
                 }
             }
 
-            // 3. Gerar mensalidades
             decimal valorParcela = valorModalidade * (1 - (decimal)percentualDesconto / 100);
 
             string sqlPagamentoPendente = @"
@@ -155,7 +152,7 @@ public class MatriculaRepository
         }
     }
 
-    public void Cancelar(int idMatricula, int idAcademia)
+    public void Cancelar(long idMatricula, long idAcademia)
     {
         using SqlConnection conexao = new(_connectionString);
         conexao.Open();
@@ -193,7 +190,7 @@ public class MatriculaRepository
         }
     }
 
-    public (decimal ValorModalidade, float PercentualDesconto, int Meses)? BuscarDadosParaMatricula(int idModalidade, int idPlano, int idAcademia)
+    public (decimal ValorModalidade, float PercentualDesconto, int Meses)? BuscarDadosParaMatricula(long idModalidade, long idPlano, long idAcademia)
     {
         string sql = @"
             SELECT mo.ValorModalidade, pl.PercentualDesconto, CAST(pl.TempoPlano AS INT) AS Meses

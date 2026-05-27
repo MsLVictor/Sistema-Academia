@@ -23,7 +23,7 @@ public class CargoRepository
 
         while (leitor.Read())
         {
-            int    identificador = (int)leitor["Id"];
+            long   identificador = (long)leitor["Id"];
             string nome          = leitor["Nome"].ToString()!;
             cargos.Add(new Cargo(identificador, nome));
         }

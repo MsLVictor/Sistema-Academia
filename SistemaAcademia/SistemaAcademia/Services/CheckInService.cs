@@ -7,7 +7,7 @@ public class CheckInService
 {
     private readonly CheckInRepository _repositorio = new CheckInRepository();
 
-    public CheckInResultado RegistrarMovimento(string cpf, int idAcademia, int idUsuario)
+    public CheckInResultado RegistrarMovimento(string cpf, long idAcademia, long idUsuario)
     {
         string cpfLimpo = string.Concat(cpf.Where(char.IsDigit));
 
@@ -21,7 +21,7 @@ public class CheckInService
         if (!_repositorio.TemMatriculaAtiva(cliente.Value.Id))
             return new CheckInResultado { Sucesso = false, Mensagem = "Aluno sem matrícula ativa." };
 
-        int? idAberto = _repositorio.BuscarEntradaAbertaId(cliente.Value.Id, idAcademia);
+        long? idAberto = _repositorio.BuscarEntradaAbertaId(cliente.Value.Id, idAcademia);
         if (idAberto.HasValue)
         {
             _repositorio.RegistrarSaida(idAberto.Value, idAcademia);
@@ -46,16 +46,16 @@ public class CheckInService
         };
     }
 
-    public IEnumerable<CheckInPresencaViewModel> ListarPresentes(int idAcademia) =>
+    public IEnumerable<CheckInPresencaViewModel> ListarPresentes(long idAcademia) =>
         _repositorio.ListarPresentes(idAcademia);
 
-    public IEnumerable<CheckInHistoricoViewModel> HistoricoPorCliente(int idCliente, int idAcademia) =>
+    public IEnumerable<CheckInHistoricoViewModel> HistoricoPorCliente(long idCliente, long idAcademia) =>
         _repositorio.HistoricoPorCliente(idCliente, idAcademia);
 
-    public bool RegistrarSaida(int idCheckIn, int idAcademia) =>
+    public bool RegistrarSaida(long idCheckIn, long idAcademia) =>
         _repositorio.RegistrarSaida(idCheckIn, idAcademia);
 
-    private void LiberarCatraca(int idCliente)
+    private void LiberarCatraca(long idCliente)
     {
         // integração com catraca pendente — implementar após identificar modelo/protocolo
     }

@@ -22,11 +22,11 @@ public class CheckInController : Controller
         return cargo == "Administrador" || cargo == "Gerente" || cargo == "Recepcionista" || cargo == "Instrutor";
     }
 
-    private int GetIdAcademia() =>
-        int.Parse(HttpContext.Session.GetString("UsuarioIdAcademia") ?? "0");
+    private long GetIdAcademia() =>
+        long.Parse(HttpContext.Session.GetString("UsuarioIdAcademia") ?? "0");
 
-    private int GetIdUsuario() =>
-        int.Parse(HttpContext.Session.GetString("UsuarioId") ?? "0");
+    private long GetIdUsuario() =>
+        long.Parse(HttpContext.Session.GetString("UsuarioId") ?? "0");
 
     [HttpGet]
     public IActionResult Scanner()
@@ -57,7 +57,7 @@ public class CheckInController : Controller
     }
 
     [HttpPost]
-    public IActionResult Saida(int id)
+    public IActionResult Saida(long id)
     {
         if (!CargoPermitido()) return RedirectToAction("Index", "Login");
 
@@ -66,12 +66,12 @@ public class CheckInController : Controller
     }
 
     [HttpGet]
-    public IActionResult Historico(int idCliente)
+    public IActionResult Historico(long idCliente)
     {
         if (!CargoPermitidoVisualizar()) return RedirectToAction("Index", "Login");
 
-        int idAcademia = GetIdAcademia();
-        var cliente    = _matriculaService.BuscarCliente(idCliente, idAcademia);
+        long idAcademia = GetIdAcademia();
+        var cliente     = _matriculaService.BuscarCliente(idCliente, idAcademia);
         if (cliente is null) return RedirectToAction("Listar", "Cliente");
 
         ViewData["Nome"]  = HttpContext.Session.GetString("UsuarioNome");

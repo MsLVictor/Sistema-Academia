@@ -11,7 +11,7 @@ public abstract class Pessoa
         Senha = senha;
     }
 
-    public int      Id             { get; init; }
+    public long     Id             { get; init; }
     public string   Nome           { get; }
     public DateTime DataNascimento { get; }
     public string   CPF            { get; }

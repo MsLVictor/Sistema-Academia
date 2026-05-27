@@ -21,7 +21,7 @@ public class OrientacaoSexualRepository
         var lista = new List<OrientacaoSexual>();
 
         while (reader.Read())
-            lista.Add(new OrientacaoSexual((int)reader["Id"], reader["Nome"].ToString()));
+            lista.Add(new OrientacaoSexual((long)reader["Id"], reader["Nome"].ToString()));
 
         return lista;
     }

@@ -5,7 +5,7 @@ GO
 
 CREATE TABLE OrientacaoSexual
 (
-    Id INT IDENTITY,
+    Id BIGINT IDENTITY,
     Nome VARCHAR(50) NOT NULL,
 
     CONSTRAINT Pk_IdOrientacaoSexual PRIMARY KEY(Id)
@@ -14,7 +14,7 @@ GO
 
 CREATE TABLE Cargo
 (
-    Id INT IDENTITY,
+    Id BIGINT IDENTITY,
     Nome VARCHAR(150) NOT NULL,
 
     CONSTRAINT Pk_IdCargo PRIMARY KEY(Id)
@@ -23,7 +23,7 @@ GO
 
 CREATE TABLE Permissao
 (
-    Id INT IDENTITY,
+    Id BIGINT IDENTITY,
     Nome VARCHAR(100) NOT NULL,
     Descricao VARCHAR(255),
 
@@ -34,9 +34,9 @@ GO
 
 CREATE TABLE CargoPermissao
 (
-    Id INT IDENTITY,
-    IdCargo INT NOT NULL,
-    IdPermissao INT NOT NULL,
+    Id BIGINT IDENTITY,
+    IdCargo BIGINT NOT NULL,
+    IdPermissao BIGINT NOT NULL,
 
     CONSTRAINT Pk_IdCargoPermissao PRIMARY KEY(Id),
     CONSTRAINT Fk_IdCargo_CargoPermissao FOREIGN KEY(IdCargo) REFERENCES Cargo(Id),
@@ -47,7 +47,7 @@ GO
 
 CREATE TABLE Endereco
 (
-    Id INT IDENTITY,
+    Id BIGINT IDENTITY,
     Logradouro VARCHAR(255) NOT NULL,
     Numero VARCHAR(10)  NOT NULL,
     Complemento VARCHAR(100),
@@ -62,8 +62,8 @@ GO
 
 CREATE TABLE Academia
 (
-    Id INT IDENTITY,
-    IdEndereco INT NOT NULL,
+    Id BIGINT IDENTITY,
+    IdEndereco BIGINT NOT NULL,
     Nome VARCHAR(150) NOT NULL,
     CNPJ CHAR(14) NOT NULL,
     Email VARCHAR(250) NOT NULL,
@@ -78,9 +78,9 @@ GO
 
 CREATE TABLE Usuario
 (
-    Id INT IDENTITY,
-    IdAcademia INT NOT NULL,
-    IdCargo INT NOT NULL,
+    Id BIGINT IDENTITY,
+    IdAcademia BIGINT NOT NULL,
+    IdCargo BIGINT NOT NULL,
     Nome VARCHAR(250) NOT NULL,
     CPF CHAR(11) NOT NULL,
     Email VARCHAR(250) NOT NULL,
@@ -98,11 +98,11 @@ GO
 
 CREATE TABLE Cliente
 (
-    Id INT IDENTITY,
-    IdAcademia INT NOT NULL,
-    IdEndereco INT NOT NULL,
-    IdUsuario INT NOT NULL,
-    IdOrientacaoSexual INT NOT NULL,
+    Id BIGINT IDENTITY,
+    IdAcademia BIGINT NOT NULL,
+    IdEndereco BIGINT NOT NULL,
+    IdUsuario BIGINT NOT NULL,
+    IdOrientacaoSexual BIGINT NOT NULL,
     Nome VARCHAR(250) NOT NULL,
     CPF CHAR(11) NOT NULL,
     DataNascimento DATE NOT NULL,
@@ -123,8 +123,8 @@ GO
 
 CREATE TABLE Telefone
 (
-    Id                  INT IDENTITY,
-    IdCliente           INT         NOT NULL,
+    Id                  BIGINT IDENTITY,
+    IdCliente           BIGINT      NOT NULL,
     Telefone            VARCHAR(15) NOT NULL,
 
     CONSTRAINT Pk_IdTelefone            PRIMARY KEY(Id),
@@ -134,10 +134,10 @@ GO
 
 CREATE TABLE CheckIn
 (
-    Id INT IDENTITY,
-    IdCliente INT NOT NULL,
-    IdAcademia INT NOT NULL,
-    IdUsuarioRegistro INT NOT NULL,
+    Id BIGINT IDENTITY,
+    IdCliente BIGINT NOT NULL,
+    IdAcademia BIGINT NOT NULL,
+    IdUsuarioRegistro BIGINT NOT NULL,
     DataHoraEntrada DATETIME NOT NULL DEFAULT GETDATE(),
     DataHoraSaida DATETIME,
 
@@ -150,8 +150,8 @@ GO
 
 CREATE TABLE AvaliacaoFisica
 (
-    Id INT IDENTITY,
-    IdCliente INT NOT NULL,
+    Id BIGINT IDENTITY,
+    IdCliente BIGINT NOT NULL,
     Peso FLOAT,
     PorcentagemGorduraCorporal FLOAT,
     PorcentagemMassaMagra FLOAT,
@@ -170,7 +170,7 @@ GO
 
 CREATE TABLE Exercicio
 (
-    Id INT IDENTITY,
+    Id BIGINT IDENTITY,
     Nome VARCHAR(250) NOT NULL,
     GrupoMuscular VARCHAR(100) NOT NULL,
     Descricao VARCHAR(500),
@@ -181,8 +181,8 @@ GO
 
 CREATE TABLE Modalidade
 (
-    Id INT IDENTITY,
-    IdAcademia INT NOT NULL,
+    Id BIGINT IDENTITY,
+    IdAcademia BIGINT NOT NULL,
     Nome VARCHAR(250) NOT NULL,
     ValorModalidade DECIMAL(10,2) NOT NULL,
 
@@ -193,8 +193,8 @@ GO
 
 CREATE TABLE Plano
 (
-    Id INT IDENTITY,
-    IdAcademia INT NOT NULL,
+    Id BIGINT IDENTITY,
+    IdAcademia BIGINT NOT NULL,
     Nome VARCHAR(255) NOT NULL,
     TempoPlano CHAR(2) NOT NULL,
     PercentualDesconto FLOAT NOT NULL,
@@ -206,10 +206,10 @@ GO
 
 CREATE TABLE MatriculaCliente
 (
-    Id INT IDENTITY,
-    IdCliente INT NOT NULL,
-    IdModalidade INT NOT NULL,
-    IdPlano INT NOT NULL,
+    Id BIGINT IDENTITY,
+    IdCliente BIGINT NOT NULL,
+    IdModalidade BIGINT NOT NULL,
+    IdPlano BIGINT NOT NULL,
     DataInicio DATETIME NOT NULL,
     StatusSituacao  CHAR(1) NOT NULL,
 
@@ -223,10 +223,10 @@ GO
 
 CREATE TABLE Treino
 (
-    Id INT IDENTITY,
-    IdAcademia INT NOT NULL,
-    IdInstrutor INT NOT NULL,
-    IdCliente INT NOT NULL,
+    Id BIGINT IDENTITY,
+    IdAcademia BIGINT NOT NULL,
+    IdInstrutor BIGINT NOT NULL,
+    IdCliente BIGINT NOT NULL,
     Nome VARCHAR(250) NOT NULL,
     Observacao VARCHAR(500),
     DataCriacao DATE NOT NULL DEFAULT GETDATE(),
@@ -242,9 +242,9 @@ GO
 
 CREATE TABLE TreinoExercicio
 (
-    Id INT IDENTITY,
-    IdTreino INT NOT NULL,
-    IdExercicio INT NOT NULL,
+    Id BIGINT IDENTITY,
+    IdTreino BIGINT NOT NULL,
+    IdExercicio BIGINT NOT NULL,
     Series INT NOT NULL,
     Repeticoes INT NOT NULL,
     CargaKg DECIMAL(5,2),
@@ -259,9 +259,9 @@ GO
 
 CREATE TABLE Evento
 (
-    Id INT IDENTITY,
-    IdAcademia INT NOT NULL,
-    IdUsuario INT NOT NULL,
+    Id BIGINT IDENTITY,
+    IdAcademia BIGINT NOT NULL,
+    IdUsuario BIGINT NOT NULL,
     Titulo VARCHAR(255) NOT NULL,
     Descricao VARCHAR(MAX),
     DataInicio DATETIME NOT NULL,
@@ -277,7 +277,7 @@ GO
 
 CREATE TABLE MetodoPagamento
 (
-    Id INT IDENTITY,
+    Id BIGINT IDENTITY,
     Nome VARCHAR(255) NOT NULL,
 
     CONSTRAINT Pk_IdMetodoPagamento PRIMARY KEY(Id)
@@ -286,7 +286,7 @@ GO
 
 CREATE TABLE StatusPagamento
 (
-    Id INT IDENTITY,
+    Id BIGINT IDENTITY,
     Nome VARCHAR(255) NOT NULL,
 
     CONSTRAINT Pk_IdStatusPagamento PRIMARY KEY(Id)
@@ -295,10 +295,10 @@ GO
 
 CREATE TABLE Pagamento
 (
-    Id INT IDENTITY,
-    IdMatriculaCliente INT NOT NULL,
-    IdMetodoPagamento INT,
-    IdStatusPagamento INT NOT NULL,
+    Id BIGINT IDENTITY,
+    IdMatriculaCliente BIGINT NOT NULL,
+    IdMetodoPagamento BIGINT,
+    IdStatusPagamento BIGINT NOT NULL,
     ValorPago DECIMAL(10,2) NOT NULL,
     DataVencimento DATE NOT NULL,
     DataPagamento DATE,
@@ -313,10 +313,10 @@ GO
 CREATE TABLE AuditoriaLog
 (
     Id BIGINT IDENTITY,
-    IdAcademia INT NOT NULL,
-    IdUsuario INT,
+    IdAcademia BIGINT NOT NULL,
+    IdUsuario BIGINT,
     TabelaAfetada VARCHAR(50) NOT NULL,
-    RegistroId INT NOT NULL,
+    RegistroId BIGINT NOT NULL,
     Acao VARCHAR(10) NOT NULL,
     CampoAlterado VARCHAR(50),
     ValorAnterior VARCHAR(255),

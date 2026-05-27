@@ -39,12 +39,12 @@ public class UsuarioRepository
             "",
             new Cargo(reader["Cargo"].ToString()))
         {
-            Id         = (int)reader["Id"],
-            IdAcademia = (int)reader["IdAcademia"]
+            Id         = (long)reader["Id"],
+            IdAcademia = (long)reader["IdAcademia"]
         };
     }
 
-    public IEnumerable<FuncionarioViewModel> ListarPorAcademia(int idAcademia)
+    public IEnumerable<FuncionarioViewModel> ListarPorAcademia(long idAcademia)
     {
         string sql = @"
             SELECT us.Id, us.Nome, us.CPF, us.Email, us.Ativo,
@@ -67,12 +67,12 @@ public class UsuarioRepository
         {
             lista.Add(new FuncionarioViewModel
             {
-                Id      = (int)reader["Id"],
+                Id      = (long)reader["Id"],
                 Nome    = reader["Nome"].ToString(),
                 CPF     = reader["CPF"].ToString(),
                 Email   = reader["Email"].ToString(),
                 Cargo   = reader["Cargo"].ToString(),
-                IdCargo = (int)reader["IdCargo"],
+                IdCargo = (long)reader["IdCargo"],
                 Ativo   = reader["Ativo"].ToString()
             });
         }
@@ -80,7 +80,7 @@ public class UsuarioRepository
         return lista;
     }
 
-    public void CadastrarFuncionario(CadastroFuncionarioViewModel dados, int idAcademia)
+    public void CadastrarFuncionario(CadastroFuncionarioViewModel dados, long idAcademia)
     {
         string cpf       = string.Concat(dados.CPFFuncionario.Where(char.IsDigit));
         byte[] hashSenha = SHA256.HashData(Encoding.UTF8.GetBytes(dados.SenhaFuncionario.Trim()));
@@ -103,7 +103,7 @@ public class UsuarioRepository
         comando.ExecuteNonQuery();
     }
 
-    public void Atualizar(EditarFuncionarioViewModel dados, int idAcademia)
+    public void Atualizar(EditarFuncionarioViewModel dados, long idAcademia)
     {
         string sql = @"
             UPDATE Usuario
@@ -123,7 +123,7 @@ public class UsuarioRepository
         comando.ExecuteNonQuery();
     }
 
-    public void AlterarStatus(int id, string ativo, int idAcademia, int idLogado)
+    public void AlterarStatus(long id, string ativo, long idAcademia, long idLogado)
     {
         string sql = @"
             UPDATE Usuario SET Ativo = @ativo

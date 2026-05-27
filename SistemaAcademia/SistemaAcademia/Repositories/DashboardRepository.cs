@@ -9,7 +9,7 @@ public class DashboardRepository
         Environment.GetEnvironmentVariable("CONNECTION_STRING")
         ?? @"Data Source=DESKTOP-5V5TG5F\SQLEXPRESS;Initial Catalog=SistemaAcademia;Integrated Security=True;Persist Security Info=False;Pooling=False;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Application Name='SQL Server Management Studio';Command Timeout=0";
 
-    public DashboardViewModel Carregar(int idAcademia)
+    public DashboardViewModel Carregar(long idAcademia)
     {
         string sql = @"
             SELECT
@@ -75,7 +75,7 @@ public class DashboardRepository
         return vm;
     }
 
-    private List<ReceitaMensalItem> CarregarTendencia(SqlConnection conexao, int idAcademia)
+    private List<ReceitaMensalItem> CarregarTendencia(SqlConnection conexao, long idAcademia)
     {
         string sql = @"
             SELECT YEAR(pg.DataPagamento) AS Ano, MONTH(pg.DataPagamento) AS Mes,
@@ -110,7 +110,7 @@ public class DashboardRepository
         return lista;
     }
 
-    private List<AlertaAtrasoItem> CarregarAlertas(SqlConnection conexao, int idAcademia)
+    private List<AlertaAtrasoItem> CarregarAlertas(SqlConnection conexao, long idAcademia)
     {
         string sql = @"
             SELECT TOP 5

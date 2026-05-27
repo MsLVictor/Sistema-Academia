@@ -10,8 +10,8 @@ public class PlanoController : Controller
 {
     private readonly PlanoService _planoService = new PlanoService();
 
-    private int GetIdAcademia() =>
-        int.Parse(HttpContext.Session.GetString("UsuarioIdAcademia") ?? "0");
+    private long GetIdAcademia() =>
+        long.Parse(HttpContext.Session.GetString("UsuarioIdAcademia") ?? "0");
 
     private bool CargoPermitido()
     {
@@ -24,7 +24,7 @@ public class PlanoController : Controller
     {
         if (!CargoPermitido()) return RedirectToAction("Index", "Login");
 
-        int idAcademia = GetIdAcademia();
+        long idAcademia = GetIdAcademia();
         ViewData["Nome"]  = HttpContext.Session.GetString("UsuarioNome");
         ViewBag.Planos    = _planoService.Listar(idAcademia);
         return View();
@@ -67,7 +67,7 @@ public class PlanoController : Controller
     }
 
     [HttpPost]
-    public IActionResult Excluir(int id)
+    public IActionResult Excluir(long id)
     {
         if (!CargoPermitido()) return RedirectToAction("Index", "Login");
 

@@ -16,11 +16,11 @@ public class ClienteController : Controller
     private readonly ModalidadeService _modalidadeService = new ModalidadeService();
     private readonly PagamentoService  _pagamentoService  = new PagamentoService();
 
-    private int? GetIdAcademia() =>
-        int.TryParse(HttpContext.Session.GetString("UsuarioIdAcademia"), out var id) ? id : null;
+    private long? GetIdAcademia() =>
+        long.TryParse(HttpContext.Session.GetString("UsuarioIdAcademia"), out var id) ? id : null;
 
-    private int? GetIdUsuario() =>
-        int.TryParse(HttpContext.Session.GetString("UsuarioId"), out var id) ? id : null;
+    private long? GetIdUsuario() =>
+        long.TryParse(HttpContext.Session.GetString("UsuarioId"), out var id) ? id : null;
 
     private bool CargoPermitidoListar()
     {
@@ -47,7 +47,7 @@ public class ClienteController : Controller
     {
         if (!CargoPermitidoListar()) return RedirectToAction("Index", "Login");
 
-        int? idAcademia = GetIdAcademia();
+        long? idAcademia = GetIdAcademia();
         if (idAcademia is null) return RedirectToAction("Index", "Login");
 
         ViewData["Nome"]           = HttpContext.Session.GetString("UsuarioNome");
@@ -66,7 +66,7 @@ public class ClienteController : Controller
         if (!CargoPermitidoEditar()) return RedirectToAction("Index", "Login");
         if (GetIdAcademia() is null) return RedirectToAction("Index", "Login");
 
-        int idAcademia = GetIdAcademia().Value;
+        long idAcademia = GetIdAcademia().Value;
         ViewData["Nome"]           = HttpContext.Session.GetString("UsuarioNome");
         ViewData["PainelAction"]   = PainelDoUsuario();
         ViewBag.OrientacoesSexuais = new OrientacaoSexualRepository().BuscarTodos();
@@ -82,11 +82,11 @@ public class ClienteController : Controller
     {
         if (!CargoPermitidoEditar()) return RedirectToAction("Index", "Login");
 
-        int? idAcademia = GetIdAcademia();
-        int? idUsuario  = GetIdUsuario();
+        long? idAcademia = GetIdAcademia();
+        long? idUsuario  = GetIdUsuario();
         if (idAcademia is null || idUsuario is null) return RedirectToAction("Index", "Login");
 
-        int idNovoCliente;
+        long idNovoCliente;
         try
         {
             idNovoCliente = _clienteService.Cadastrar(dados, idAcademia.Value, idUsuario.Value);
@@ -145,11 +145,11 @@ public class ClienteController : Controller
     }
 
     [HttpGet]
-    public IActionResult Editar(int id)
+    public IActionResult Editar(long id)
     {
         if (!CargoPermitidoEditar()) return RedirectToAction("Index", "Login");
 
-        int? idAcademia = GetIdAcademia();
+        long? idAcademia = GetIdAcademia();
         if (idAcademia is null) return RedirectToAction("Index", "Login");
 
         var cliente = _clienteService.BuscarPorId(id, idAcademia.Value);
@@ -167,7 +167,7 @@ public class ClienteController : Controller
     {
         if (!CargoPermitidoEditar()) return RedirectToAction("Index", "Login");
 
-        int? idAcademia = GetIdAcademia();
+        long? idAcademia = GetIdAcademia();
         if (idAcademia is null) return RedirectToAction("Index", "Login");
 
         try
@@ -184,11 +184,11 @@ public class ClienteController : Controller
     }
 
     [HttpPost]
-    public IActionResult AlterarStatus(int id, string ativo)
+    public IActionResult AlterarStatus(long id, string ativo)
     {
         if (!CargoPermitidoEditar()) return RedirectToAction("Index", "Login");
 
-        int? idAcademia = GetIdAcademia();
+        long? idAcademia = GetIdAcademia();
         if (idAcademia is null) return RedirectToAction("Index", "Login");
 
         try

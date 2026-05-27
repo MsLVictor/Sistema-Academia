@@ -10,8 +10,8 @@ public class ModalidadeController : Controller
 {
     private readonly ModalidadeService _modalidadeService = new ModalidadeService();
 
-    private int GetIdAcademia() =>
-        int.Parse(HttpContext.Session.GetString("UsuarioIdAcademia") ?? "0");
+    private long GetIdAcademia() =>
+        long.Parse(HttpContext.Session.GetString("UsuarioIdAcademia") ?? "0");
 
     private bool CargoPermitido()
     {
@@ -24,7 +24,7 @@ public class ModalidadeController : Controller
     {
         if (!CargoPermitido()) return RedirectToAction("Index", "Login");
 
-        int idAcademia = GetIdAcademia();
+        long idAcademia = GetIdAcademia();
         ViewData["Nome"]      = HttpContext.Session.GetString("UsuarioNome");
         ViewBag.Modalidades   = _modalidadeService.Listar(idAcademia);
         return View();
@@ -67,7 +67,7 @@ public class ModalidadeController : Controller
     }
 
     [HttpPost]
-    public IActionResult Excluir(int id)
+    public IActionResult Excluir(long id)
     {
         if (!CargoPermitido()) return RedirectToAction("Index", "Login");
 

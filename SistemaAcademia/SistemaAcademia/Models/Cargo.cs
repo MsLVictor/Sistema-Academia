@@ -7,12 +7,12 @@ public class Cargo
         Nome = nome;
     }
 
-    public Cargo(int id, string nome)
+    public Cargo(long id, string nome)
     {
         Id = id;
         Nome = nome;
     }
 
-    public int Id { get; }
+    public long Id { get; }
     public string Nome { get; }
 }

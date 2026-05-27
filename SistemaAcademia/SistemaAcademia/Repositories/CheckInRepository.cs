@@ -9,7 +9,7 @@ public class CheckInRepository
         Environment.GetEnvironmentVariable("CONNECTION_STRING")
         ?? @"Data Source=DESKTOP-5V5TG5F\SQLEXPRESS;Initial Catalog=SistemaAcademia;Integrated Security=True;Persist Security Info=False;Pooling=False;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Application Name='SQL Server Management Studio';Command Timeout=0";
 
-    public (int Id, string Nome)? BuscarClientePorCpf(string cpf, int idAcademia)
+    public (long Id, string Nome)? BuscarClientePorCpf(string cpf, long idAcademia)
     {
         string sql = @"
             SELECT Id, Nome FROM Cliente
@@ -23,10 +23,10 @@ public class CheckInRepository
         conexao.Open();
         using SqlDataReader reader = comando.ExecuteReader();
         if (!reader.Read()) return null;
-        return ((int)reader["Id"], reader["Nome"].ToString());
+        return ((long)reader["Id"], reader["Nome"].ToString());
     }
 
-    public bool TemMatriculaAtiva(int idCliente)
+    public bool TemMatriculaAtiva(long idCliente)
     {
         string sql = @"
             SELECT COUNT(1) FROM MatriculaCliente
@@ -40,7 +40,7 @@ public class CheckInRepository
         return (int)comando.ExecuteScalar() > 0;
     }
 
-    public bool TemEntradaAberta(int idCliente, int idAcademia)
+    public bool TemEntradaAberta(long idCliente, long idAcademia)
     {
         string sql = @"
             SELECT COUNT(1) FROM CheckIn
@@ -57,7 +57,7 @@ public class CheckInRepository
         return (int)comando.ExecuteScalar() > 0;
     }
 
-    public int? BuscarEntradaAbertaId(int idCliente, int idAcademia)
+    public long? BuscarEntradaAbertaId(long idCliente, long idAcademia)
     {
         string sql = @"
             SELECT TOP 1 Id FROM CheckIn
@@ -73,10 +73,10 @@ public class CheckInRepository
 
         conexao.Open();
         var resultado = comando.ExecuteScalar();
-        return resultado == DBNull.Value || resultado is null ? null : (int?)Convert.ToInt32(resultado);
+        return resultado == DBNull.Value || resultado is null ? null : (long?)Convert.ToInt64(resultado);
     }
 
-    public void RegistrarEntrada(int idCliente, int idAcademia, int idUsuario)
+    public void RegistrarEntrada(long idCliente, long idAcademia, long idUsuario)
     {
         string sql = @"
             INSERT INTO CheckIn (IdCliente, IdAcademia, IdUsuarioRegistro, DataHoraEntrada)
@@ -92,7 +92,7 @@ public class CheckInRepository
         comando.ExecuteNonQuery();
     }
 
-    public bool RegistrarSaida(int idCheckIn, int idAcademia)
+    public bool RegistrarSaida(long idCheckIn, long idAcademia)
     {
         string sql = @"
             UPDATE CheckIn SET DataHoraSaida = GETDATE()
@@ -107,7 +107,7 @@ public class CheckInRepository
         return comando.ExecuteNonQuery() > 0;
     }
 
-    public IEnumerable<CheckInPresencaViewModel> ListarPresentes(int idAcademia)
+    public IEnumerable<CheckInPresencaViewModel> ListarPresentes(long idAcademia)
     {
         string sql = @"
             SELECT ci.Id, cl.Nome AS NomeCliente, ci.DataHoraEntrada,
@@ -132,7 +132,7 @@ public class CheckInRepository
         {
             lista.Add(new CheckInPresencaViewModel
             {
-                IdCheckIn         = (int)reader["Id"],
+                IdCheckIn         = (long)reader["Id"],
                 NomeCliente       = reader["NomeCliente"].ToString(),
                 DataHoraEntrada   = (DateTime)reader["DataHoraEntrada"],
                 NomeRecepcionista = reader["NomeRecepcionista"].ToString()
@@ -141,7 +141,7 @@ public class CheckInRepository
         return lista;
     }
 
-    public IEnumerable<CheckInHistoricoViewModel> HistoricoPorCliente(int idCliente, int idAcademia)
+    public IEnumerable<CheckInHistoricoViewModel> HistoricoPorCliente(long idCliente, long idAcademia)
     {
         string sql = @"
             SELECT ci.Id, ci.DataHoraEntrada, ci.DataHoraSaida,
@@ -165,7 +165,7 @@ public class CheckInRepository
         {
             lista.Add(new CheckInHistoricoViewModel
             {
-                Id                = (int)reader["Id"],
+                Id                = (long)reader["Id"],
                 DataHoraEntrada   = (DateTime)reader["DataHoraEntrada"],
                 DataHoraSaida     = reader["DataHoraSaida"] == DBNull.Value ? null : (DateTime?)reader["DataHoraSaida"],
                 NomeRecepcionista = reader["NomeRecepcionista"].ToString()

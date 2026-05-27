@@ -9,7 +9,7 @@ public class PagamentoRepository
         Environment.GetEnvironmentVariable("CONNECTION_STRING")
         ?? @"Data Source=DESKTOP-5V5TG5F\SQLEXPRESS;Initial Catalog=SistemaAcademia;Integrated Security=True;Persist Security Info=False;Pooling=False;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Application Name='SQL Server Management Studio';Command Timeout=0";
 
-    public IEnumerable<PagamentoListaViewModel> ListarPorCliente(int idCliente, int idAcademia)
+    public IEnumerable<PagamentoListaViewModel> ListarPorCliente(long idCliente, long idAcademia)
     {
         string sql = @"
             SELECT pg.Id, mc.Id AS IdMatricula,
@@ -42,8 +42,8 @@ public class PagamentoRepository
         {
             lista.Add(new PagamentoListaViewModel
             {
-                Id              = (int)reader["Id"],
-                IdMatricula     = (int)reader["IdMatricula"],
+                Id              = (long)reader["Id"],
+                IdMatricula     = (long)reader["IdMatricula"],
                 NomeModalidade  = reader["NomeModalidade"].ToString(),
                 NomePlano       = reader["NomePlano"].ToString(),
                 ValorEsperado   = (decimal)reader["ValorEsperado"],
@@ -69,12 +69,12 @@ public class PagamentoRepository
 
         var lista = new List<MetodoPagamentoViewModel>();
         while (reader.Read())
-            lista.Add(new MetodoPagamentoViewModel { Id = (int)reader["Id"], Nome = reader["Nome"].ToString() });
+            lista.Add(new MetodoPagamentoViewModel { Id = (long)reader["Id"], Nome = reader["Nome"].ToString() });
 
         return lista;
     }
 
-    public bool Registrar(RegistrarPagamentoViewModel dados, int idAcademia)
+    public bool Registrar(RegistrarPagamentoViewModel dados, long idAcademia)
     {
         string sql = @"
             UPDATE pg
@@ -102,7 +102,7 @@ public class PagamentoRepository
         return comando.ExecuteNonQuery() > 0;
     }
 
-    public int AtualizarVencidos(int idAcademia)
+    public int AtualizarVencidos(long idAcademia)
     {
         string sql = @"
             UPDATE pg
@@ -123,7 +123,7 @@ public class PagamentoRepository
     }
 
     // hook para integração futura com Asaas
-    public string GerarCobrancaAsaas(int idPagamento, int idAcademia)
+    public string GerarCobrancaAsaas(long idPagamento, long idAcademia)
     {
         // integração com Asaas pendente — retornar URL do QR PIX quando implementado
         return null;

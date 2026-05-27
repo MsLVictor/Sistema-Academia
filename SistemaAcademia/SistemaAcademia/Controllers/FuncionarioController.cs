@@ -10,16 +10,16 @@ public class FuncionarioController : Controller
 {
     private readonly FuncionarioService _funcionarioService = new FuncionarioService();
 
-    private int? GetIdAcademia() =>
-        int.TryParse(HttpContext.Session.GetString("UsuarioIdAcademia"), out var id) ? id : null;
+    private long? GetIdAcademia() =>
+        long.TryParse(HttpContext.Session.GetString("UsuarioIdAcademia"), out var id) ? id : null;
 
-    private int? GetIdLogado() =>
-        int.TryParse(HttpContext.Session.GetString("UsuarioId"), out var id) ? id : null;
+    private long? GetIdLogado() =>
+        long.TryParse(HttpContext.Session.GetString("UsuarioId"), out var id) ? id : null;
 
     [HttpPost]
     public IActionResult Cadastrar(CadastroFuncionarioViewModel dados)
     {
-        int? idAcademia = GetIdAcademia();
+        long? idAcademia = GetIdAcademia();
         if (idAcademia is null) return RedirectToAction("Index", "Login");
 
         try
@@ -38,7 +38,7 @@ public class FuncionarioController : Controller
     [HttpPost]
     public IActionResult Editar(EditarFuncionarioViewModel dados)
     {
-        int? idAcademia = GetIdAcademia();
+        long? idAcademia = GetIdAcademia();
         if (idAcademia is null) return RedirectToAction("Index", "Login");
 
         try
@@ -55,10 +55,10 @@ public class FuncionarioController : Controller
     }
 
     [HttpPost]
-    public IActionResult AlterarStatus(int id, string ativo)
+    public IActionResult AlterarStatus(long id, string ativo)
     {
-        int? idAcademia = GetIdAcademia();
-        int? idLogado   = GetIdLogado();
+        long? idAcademia = GetIdAcademia();
+        long? idLogado   = GetIdLogado();
         if (idAcademia is null || idLogado is null) return RedirectToAction("Index", "Login");
 
         try

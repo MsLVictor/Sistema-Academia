@@ -37,14 +37,14 @@ public class ClienteRepository
             reader["Email"].ToString(),
             "",
             (DateTime)reader["DataNascimento"],
-            (int)reader["IdUsuario"])
+            (long)reader["IdUsuario"])
         {
-            Id         = (int)reader["Id"],
-            IdAcademia = (int)reader["IdAcademia"]
+            Id         = (long)reader["Id"],
+            IdAcademia = (long)reader["IdAcademia"]
         };
     }
 
-    public IEnumerable<ClienteListaViewModel> Listar(int idAcademia, string busca, string status)
+    public IEnumerable<ClienteListaViewModel> Listar(long idAcademia, string busca, string status)
     {
         string sql = @"
             SELECT cl.Id, cl.Nome, cl.CPF, cl.Email, cl.DataNascimento, cl.Ativo,
@@ -70,7 +70,7 @@ public class ClienteRepository
         {
             lista.Add(new ClienteListaViewModel
             {
-                Id             = (int)reader["Id"],
+                Id             = (long)reader["Id"],
                 Nome           = reader["Nome"].ToString(),
                 CPF            = reader["CPF"].ToString(),
                 Email          = reader["Email"].ToString(),
@@ -83,7 +83,7 @@ public class ClienteRepository
         return lista;
     }
 
-    public int Cadastrar(CadastroClienteViewModel dados, int idAcademia, int idUsuario)
+    public long Cadastrar(CadastroClienteViewModel dados, long idAcademia, long idUsuario)
     {
         string cpf   = string.Concat(dados.CPF.Where(char.IsDigit));
         string cep   = string.Concat(dados.CEP.Where(char.IsDigit));
@@ -101,7 +101,7 @@ public class ClienteRepository
                 VALUES (@logradouro, @numero, @complemento, @bairro, @cep, @cidade, @estado);
                 SELECT SCOPE_IDENTITY();";
 
-            int idEndereco;
+            long idEndereco;
             using (var cmd = new SqlCommand(sqlEndereco, conexao, transacao))
             {
                 cmd.Parameters.AddWithValue("@logradouro",  dados.Logradouro);
@@ -111,7 +111,7 @@ public class ClienteRepository
                 cmd.Parameters.AddWithValue("@cep",         cep);
                 cmd.Parameters.AddWithValue("@cidade",      dados.Cidade);
                 cmd.Parameters.AddWithValue("@estado",      dados.Estado);
-                idEndereco = Convert.ToInt32(cmd.ExecuteScalar());
+                idEndereco = Convert.ToInt64(cmd.ExecuteScalar());
             }
 
             string sqlCliente = @"
@@ -119,7 +119,7 @@ public class ClienteRepository
                 VALUES (@idAcademia, @idEndereco, @idUsuario, @idOrientacaoSexual, @nome, @cpf, @dataNascimento, @email, @senha);
                 SELECT SCOPE_IDENTITY();";
 
-            int idCliente;
+            long idCliente;
             using (var cmd = new SqlCommand(sqlCliente, conexao, transacao))
             {
                 cmd.Parameters.AddWithValue("@idAcademia",         idAcademia);
@@ -131,7 +131,7 @@ public class ClienteRepository
                 cmd.Parameters.AddWithValue("@dataNascimento",     dados.DataNascimento);
                 cmd.Parameters.AddWithValue("@email",              dados.Email.Trim());
                 cmd.Parameters.AddWithValue("@senha",              senha);
-                idCliente = Convert.ToInt32(cmd.ExecuteScalar());
+                idCliente = Convert.ToInt64(cmd.ExecuteScalar());
             }
 
             string sqlTel = "INSERT INTO Telefone (IdCliente, Telefone) VALUES (@idCliente, @telefone)";
@@ -161,7 +161,7 @@ public class ClienteRepository
         }
     }
 
-    public EditarClienteViewModel BuscarPorId(int id, int idAcademia)
+    public EditarClienteViewModel BuscarPorId(long id, long idAcademia)
     {
         string sql = @"
             SELECT cl.Id, cl.Nome, cl.CPF, cl.Email, cl.DataNascimento, cl.IdOrientacaoSexual,
@@ -183,12 +183,12 @@ public class ClienteRepository
 
         return new EditarClienteViewModel
         {
-            Id                 = (int)reader["Id"],
+            Id                 = (long)reader["Id"],
             CPF                = reader["CPF"].ToString(),
             Nome               = reader["Nome"].ToString(),
             Email              = reader["Email"].ToString(),
             DataNascimento     = (DateTime)reader["DataNascimento"],
-            IdOrientacaoSexual = (int)reader["IdOrientacaoSexual"],
+            IdOrientacaoSexual = (long)reader["IdOrientacaoSexual"],
             Logradouro         = reader["Logradouro"].ToString(),
             Numero             = reader["Numero"].ToString(),
             Complemento        = reader["Complemento"].ToString(),
@@ -199,7 +199,7 @@ public class ClienteRepository
         };
     }
 
-    public void Atualizar(EditarClienteViewModel dados, int idAcademia)
+    public void Atualizar(EditarClienteViewModel dados, long idAcademia)
     {
         string cep = string.Concat(dados.CEP.Where(char.IsDigit));
 
@@ -254,7 +254,7 @@ public class ClienteRepository
         }
     }
 
-    public void AlterarStatus(int id, string ativo, int idAcademia)
+    public void AlterarStatus(long id, string ativo, long idAcademia)
     {
         string sql = @"
             UPDATE Cliente SET Ativo = @ativo

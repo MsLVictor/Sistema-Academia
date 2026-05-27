@@ -7,16 +7,16 @@ public class MatriculaService
 {
     private readonly MatriculaRepository _repositorio = new MatriculaRepository();
 
-    public ClienteMatriculaViewModel BuscarCliente(int idCliente, int idAcademia) =>
+    public ClienteMatriculaViewModel BuscarCliente(long idCliente, long idAcademia) =>
         _repositorio.BuscarCliente(idCliente, idAcademia);
 
-    public bool TemMatriculaAtiva(int idCliente) =>
+    public bool TemMatriculaAtiva(long idCliente) =>
         _repositorio.TemMatriculaAtiva(idCliente);
 
-    public IEnumerable<MatriculaListaViewModel> ListarPorCliente(int idCliente, int idAcademia) =>
+    public IEnumerable<MatriculaListaViewModel> ListarPorCliente(long idCliente, long idAcademia) =>
         _repositorio.ListarPorCliente(idCliente, idAcademia);
 
-    public (bool Sucesso, string Erro) Matricular(MatriculaViewModel dados, int idAcademia)
+    public (bool Sucesso, string Erro) Matricular(MatriculaViewModel dados, long idAcademia)
     {
         if (_repositorio.TemMatriculaAtiva(dados.IdCliente))
             return (false, "Aluno já possui matrícula ativa.");
@@ -30,6 +30,6 @@ public class MatriculaService
         return (true, string.Empty);
     }
 
-    public void Cancelar(int idMatricula, int idAcademia) =>
+    public void Cancelar(long idMatricula, long idAcademia) =>
         _repositorio.Cancelar(idMatricula, idAcademia);
 }

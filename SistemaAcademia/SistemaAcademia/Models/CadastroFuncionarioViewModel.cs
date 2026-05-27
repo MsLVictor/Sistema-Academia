@@ -6,5 +6,5 @@ public class CadastroFuncionarioViewModel
     public string CPFFuncionario { get; set; } = string.Empty;
     public string EmailFuncionario { get; set; } = string.Empty;
     public string SenhaFuncionario { get; set; } = string.Empty;
-    public int IdCargo { get; set; }
+    public long IdCargo { get; set; }
 }
