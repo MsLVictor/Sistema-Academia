@@ -1,0 +1,333 @@
+﻿@{
+    Layout = null;
+    var estados = new[] { "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO" };
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cadastrar Aluno · FitManager</title>
+  <style>
+    :root {
+      --fundo: oklch(99% 0.002 240); --superficie: oklch(100% 0 0);
+      --texto: oklch(18% 0.012 250); --texto-muted: oklch(54% 0.012 250);
+      --borda: oklch(92% 0.005 250); --destaque: oklch(82% 0.18 145);
+      --fonte-titulo: 'Iowan Old Style','Charter',Georgia,serif;
+      --fonte-corpo: -apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+      --raio: 10px; --raio-lg: 16px; --gap-md: 20px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--fundo); color: var(--texto); font-family: var(--fonte-corpo); }
+
+    .topbar { background: var(--superficie); border-bottom: 1px solid var(--borda); padding: 14px 40px; display: flex; align-items: center; gap: 16px; }
+    .topbar-logo { font-family: var(--fonte-titulo); font-size: 18px; font-weight: 600; }
+    .topbar-sep { color: var(--borda); }
+    .topbar-titulo { font-size: 15px; font-weight: 600; flex-grow: 1; }
+    .topbar-usuario { font-size: 13px; color: var(--texto-muted); }
+    .topbar-voltar { font-size: 13px; color: var(--texto-muted); text-decoration: none; }
+    .topbar-voltar:hover { color: var(--texto); }
+
+    .conteudo { max-width: 800px; margin: 0 auto; padding: 40px; }
+    .cartao { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-lg); padding: 32px; margin-bottom: var(--gap-md); }
+    .cartao h2 { font-family: var(--fonte-titulo); font-size: 18px; margin: 0 0 24px; }
+    .grade { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .span2 { grid-column: span 2; }
+
+    .grupo-input { margin-bottom: 0; }
+    .grupo-input label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 6px; color: var(--texto-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .req { color: #e53e3e; margin-left: 2px; }
+    .grupo-input input, .grupo-input select { width: 100%; padding: 10px 14px; border: 1px solid var(--borda); border-radius: var(--raio); font-family: inherit; font-size: 14px; background: var(--superficie); color: var(--texto); }
+    .grupo-input input:focus, .grupo-input select:focus { outline: 2px solid var(--destaque); border-color: transparent; }
+    .grupo-input input[disabled] { background: var(--fundo); color: var(--texto-muted); cursor: not-allowed; }
+
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie); color: var(--texto); font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; transition: background 0.15s; font-family: inherit; }
+    .btn:hover { background: var(--fundo); }
+    .btn-primario { background: var(--destaque); border-color: var(--destaque); }
+    .btn-primario:hover { background: color-mix(in oklch, var(--destaque) 85%, white); }
+
+    .secao-titulo { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--texto-muted); border-bottom: 1px solid var(--borda); padding-bottom: 10px; margin: 0 0 20px; grid-column: span 2; }
+
+    .spinner { display: none; width: 14px; height: 14px; border: 2px solid var(--borda); border-top-color: var(--destaque); border-radius: 50%; animation: spin 0.6s linear infinite; margin-left: 8px; vertical-align: middle; }
+    @@keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <a class="topbar-logo" asp-controller="Home" asp-action="Index" style="text-decoration:none;color:inherit;">FitManager</a>
+    <span class="topbar-sep">·</span>
+    <span class="topbar-titulo">Cadastrar Aluno</span>
+    <span class="topbar-usuario">@ViewData["Nome"]</span>
+    <a asp-controller="Cliente" asp-action="Listar" class="topbar-voltar">← Voltar</a>
+  </header>
+
+  <main class="conteudo">
+    <form asp-controller="Cliente" asp-action="Cadastrar" method="post">
+      <div class="cartao">
+        <div class="grade">
+          <span class="secao-titulo">Dados Pessoais</span>
+
+          <div class="grupo-input span2">
+            <label>Nome Completo <span class="req">*</span></label>
+            <input type="text" name="Nome" placeholder="Ex: João da Silva" required />
+          </div>
+          <div class="grupo-input">
+            <label>CPF <span class="req">*</span></label>
+            <input type="text" id="cpf" name="CPF" placeholder="000.000.000-00" maxlength="14" required />
+          </div>
+          <div class="grupo-input">
+            <label>Data de Nascimento <span class="req">*</span></label>
+            <input type="date" name="DataNascimento" required max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+          </div>
+          <div class="grupo-input span2">
+            <label>Orientação Sexual <span class="req">*</span></label>
+            <select name="IdOrientacaoSexual" required>
+              <option value="">Selecione</option>
+              @if (ViewBag.OrientacoesSexuais != null)
+              {
+                  foreach (var o in ViewBag.OrientacoesSexuais)
+                  {
+                      <option value="@o.Id">@o.Nome</option>
+                  }
+              }
+            </select>
+          </div>
+
+          <span class="secao-titulo">Acesso</span>
+
+          <div class="grupo-input">
+            <label>E-mail <span class="req">*</span></label>
+            <input type="email" name="Email" placeholder="aluno@email.com" required />
+          </div>
+          <div class="grupo-input">
+            <label>Senha <span class="req">*</span></label>
+            <input type="password" name="Senha" placeholder="Mínimo 6 caracteres" minlength="6" required />
+          </div>
+
+          <span class="secao-titulo">Contato</span>
+
+          <div class="grupo-input">
+            <label>Telefone Principal <span class="req">*</span></label>
+            <input type="text" id="tel1" name="Telefone" placeholder="(00) 00000-0000" maxlength="15" required />
+          </div>
+          <div class="grupo-input">
+            <label>Telefone Opcional</label>
+            <input type="text" id="tel2" name="TelefoneOpcional" placeholder="(00) 00000-0000" maxlength="15" />
+          </div>
+
+          <span class="secao-titulo">
+            Endereço
+            <span class="spinner" id="spinner-cep"></span>
+          </span>
+
+          <div class="grupo-input">
+            <label>CEP <span class="req">*</span></label>
+            <input type="text" id="cep" name="CEP" placeholder="00000-000" maxlength="9" required />
+          </div>
+          <div class="grupo-input">
+            <label>Número <span class="req">*</span></label>
+            <input type="text" name="Numero" placeholder="123" required />
+          </div>
+          <div class="grupo-input span2">
+            <label>Logradouro <span class="req">*</span></label>
+            <input type="text" id="logradouro" name="Logradouro" placeholder="Rua, Avenida..." required />
+          </div>
+          <div class="grupo-input">
+            <label>Bairro <span class="req">*</span></label>
+            <input type="text" id="bairro" name="Bairro" required />
+          </div>
+          <div class="grupo-input">
+            <label>Complemento</label>
+            <input type="text" name="Complemento" placeholder="Apto, Bloco..." />
+          </div>
+          <div class="grupo-input">
+            <label>Cidade <span class="req">*</span></label>
+            <input type="text" id="cidade" name="Cidade" required />
+          </div>
+          <div class="grupo-input">
+            <label>Estado <span class="req">*</span></label>
+            <select id="estado" name="Estado" required>
+              <option value="">Selecione</option>
+              @foreach (var uf in estados)
+              {
+                  <option value="@uf">@uf</option>
+              }
+            </select>
+          </div>
+        </div>
+      </div>
+
+      @{
+        var modalidades = ViewBag.Modalidades as IEnumerable<SistemaAcademia.Models.ModalidadeViewModel> ?? Enumerable.Empty<SistemaAcademia.Models.ModalidadeViewModel>();
+        var planos      = ViewBag.Planos      as IEnumerable<SistemaAcademia.Models.PlanoViewModel>      ?? Enumerable.Empty<SistemaAcademia.Models.PlanoViewModel>();
+        var metodos     = ViewBag.Metodos     as IEnumerable<SistemaAcademia.Models.MetodoPagamentoViewModel> ?? Enumerable.Empty<SistemaAcademia.Models.MetodoPagamentoViewModel>();
+      }
+      @if (modalidades.Any() && planos.Any())
+      {
+        <div style="margin-bottom: 28px;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <input type="checkbox" id="chkMatricula" onchange="toggleMatricula(this.checked)"
+              style="width: 16px; height: 16px; accent-color: var(--destaque); cursor: pointer;" />
+            <label for="chkMatricula" style="font-weight: 700; font-size: 15px; cursor: pointer;">
+              Matricular agora
+            </label>
+          </div>
+
+          <div id="secaoMatricula" style="display: none; background: var(--fundo); border: 1px solid var(--borda); border-radius: var(--raio); padding: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 180px; gap: 16px;">
+              <div>
+                <label style="font-size: 12px; font-weight: 600; color: var(--texto-muted); display: block; margin-bottom: 6px;">Modalidade</label>
+                <select name="IdModalidade" id="selModalidade" class="campo" onchange="calcularPrevia()">
+                  <option value="">Selecione</option>
+                  @foreach (var m in modalidades)
+                  {
+                    <option value="@m.Id" data-valor="@m.ValorModalidade.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)">
+                      @m.Nome — R$ @m.ValorModalidade.ToString("N2")
+                    </option>
+                  }
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 12px; font-weight: 600; color: var(--texto-muted); display: block; margin-bottom: 6px;">Plano</label>
+                <select name="IdPlano" id="selPlano" class="campo" onchange="calcularPrevia()">
+                  <option value="">Selecione</option>
+                  @foreach (var p in planos)
+                  {
+                    <option value="@p.Id"
+                      data-meses="@int.Parse(p.TempoPlano)"
+                      data-desconto="@p.PercentualDesconto.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)">
+                      @p.Nome (@int.Parse(p.TempoPlano) @(int.Parse(p.TempoPlano) == 1 ? "mês" : "meses"), @p.PercentualDesconto.ToString("0.##")% desc.)
+                    </option>
+                  }
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 12px; font-weight: 600; color: var(--texto-muted); display: block; margin-bottom: 6px;">Início</label>
+                <input type="date" name="DataInicioMatricula" id="dataInicio" class="campo"
+                  value="@DateTime.Today.ToString("yyyy-MM-dd")" onchange="calcularPrevia()" />
+              </div>
+            </div>
+            <div id="previaMatricula" style="margin-top: 14px; font-size: 13px; color: var(--texto-muted);"></div>
+
+            <div style="margin-top: 16px; padding: 14px 16px; background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio);">
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; font-size: 14px;">
+                <input type="checkbox" name="PrimeiroPagoNoAto" id="chkPrimeiroPagoCad" value="true"
+                  style="width: 16px; height: 16px; accent-color: var(--destaque);"
+                  onchange="toggleMetodoCad(this.checked)" />
+                Primeiro mês pago no ato
+              </label>
+              <div id="secaoMetodoCad" style="display: none; margin-top: 12px;">
+                <label style="font-size: 12px; font-weight: 600; color: var(--texto-muted); display: block; margin-bottom: 6px;">Forma de pagamento</label>
+                <select name="IdMetodoPagamentoPrimeiro" id="selMetodoCad" class="campo" style="width: 100%; padding: 10px 14px; border: 1px solid var(--borda); border-radius: var(--raio); font-size: 14px; font-family: inherit; background: var(--superficie);">
+                  <option value="">Selecione</option>
+                  @foreach (var m in metodos)
+                  {
+                    <option value="@m.Id">@m.Nome</option>
+                  }
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <button type="submit" class="btn btn-primario">Cadastrar Aluno</button>
+        <a asp-controller="Cliente" asp-action="Listar" class="btn">Cancelar</a>
+        <span style="font-size: 12px; color: var(--texto-muted); margin-left: 4px;"><span class="req">*</span> Campo obrigatório</span>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    function toggleMetodoCad(checked) {
+      const secao = document.getElementById('secaoMetodoCad');
+      const sel   = document.getElementById('selMetodoCad');
+      secao.style.display = checked ? 'block' : 'none';
+      sel.required = checked;
+    }
+
+    function toggleMatricula(checked) {
+      const secao = document.getElementById('secaoMatricula');
+      secao.style.display = checked ? 'block' : 'none';
+      secao.querySelectorAll('select.campo, input.campo').forEach(el => {
+        el.required = checked;
+      });
+    }
+
+    function calcularPrevia() {
+      const selMod   = document.getElementById('selModalidade');
+      const selPlano = document.getElementById('selPlano');
+      const dataEl   = document.getElementById('dataInicio');
+      const previa   = document.getElementById('previaMatricula');
+
+      const optMod   = selMod.options[selMod.selectedIndex];
+      const optPlano = selPlano.options[selPlano.selectedIndex];
+
+      if (!optMod.value || !optPlano.value || !dataEl.value) {
+        previa.textContent = '';
+        return;
+      }
+
+      const valor    = parseFloat(optMod.dataset.valor   || '0');
+      const meses    = parseInt(optPlano.dataset.meses   || '0', 10);
+      const desconto = parseFloat(optPlano.dataset.desconto || '0');
+
+      const parcela  = valor * (1 - desconto / 100);
+      const inicio   = new Date(dataEl.value + 'T00:00:00');
+      const fim      = new Date(inicio);
+      fim.setMonth(fim.getMonth() + meses - 1);
+
+      const fmt = d => d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+      const brl = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+      previa.innerHTML =
+        `${meses} parcela${meses !== 1 ? 's' : ''} de <strong>${brl(parcela)}</strong>` +
+        ` · ${fmt(inicio)} → ${fmt(fim)}` +
+        ` · Total <strong>${brl(parcela * meses)}</strong>`;
+    }
+
+    document.getElementById('cpf').addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+      e.target.value = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    });
+
+    ['tel1','tel2'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('input', e => {
+        let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+        if (v.length <= 10)
+          e.target.value = v.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+        else
+          e.target.value = v.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+      });
+    });
+
+    document.getElementById('cep').addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 8);
+      e.target.value = v.replace(/(\d{5})(\d{0,3})/, '$1-$2');
+    });
+
+    document.getElementById('cep').addEventListener('blur', async function () {
+      const cep = this.value.replace(/\D/g, '');
+      if (cep.length !== 8) return;
+      const spinner = document.getElementById('spinner-cep');
+      spinner.style.display = 'inline-block';
+      try {
+        const res  = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await res.json();
+        if (!data.erro) {
+          document.getElementById('logradouro').value = data.logradouro || '';
+          document.getElementById('bairro').value     = data.bairro     || '';
+          document.getElementById('cidade').value     = data.localidade || '';
+          document.getElementById('estado').value     = data.uf         || '';
+        }
+      } catch (_) {}
+      spinner.style.display = 'none';
+    });
+  </script>
+
+</body>
+</html>

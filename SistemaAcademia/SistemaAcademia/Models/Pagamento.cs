@@ -2,27 +2,19 @@ using SistemaAcademia.Enum;
 
 namespace SistemaAcademia.Models;
 
-public class Pagamento
+public class Pagamento(int idMatricula, decimal valorPrevisto, DateTime dataVencimento)
 {
-    public Pagamento(int idMatricula, decimal valorPrevisto, DateTime dataVencimento)
-    {
-        IdMatricula = idMatricula;
-        ValorPrevisto = valorPrevisto;
-        DataVencimento = dataVencimento;
-        Status = StatusPagamentoEnum.Pendente;
-    }
-
-    public int IdMatricula { get; set; }
-    public decimal ValorPrevisto { get; set; }
+    public int Id { get; init; }
+    public int IdMatricula { get; } = idMatricula;
+    public decimal ValorPrevisto { get; } = valorPrevisto;
     public decimal? ValorPago { get; set; }
-    public DateTime DataVencimento { get; set; }
-    public DateTime? DataPagamento { get; set; }
-    public StatusPagamentoEnum Status { get; set; }
+    public DateTime DataVencimento { get; } = dataVencimento;
+    public DateTime? DataPagamento { get; private set; }
+    public StatusPagamentoEnum Status { get; private set; } = StatusPagamentoEnum.Pendente;
 
     public void RegistrarPagamento()
     {
         Status = StatusPagamentoEnum.Pago;
         DataPagamento = DateTime.Now;
     }
-
 }

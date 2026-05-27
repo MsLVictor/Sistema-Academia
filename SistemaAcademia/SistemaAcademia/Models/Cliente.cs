@@ -1,11 +1,8 @@
 namespace SistemaAcademia.Models;
 
-public class Cliente : Pessoa
+public class Cliente(string nome, string cpf, string email, string senha, DateTime dataNascimento, int idUsuario)
+    : Pessoa(nome, cpf, email, senha, dataNascimento)
 {
-    public Cliente(string nome, string cpf, string email, string senha, DateTime dataNascimento, int idUsuario) : base(nome, cpf, email, senha, dataNascimento)
-    {
-        IdUsuario = idUsuario;
-    }
-
-    public int IdUsuario { get; private set; }
+    public int IdAcademia { get; init; }
+    public int IdUsuario { get; } = idUsuario;
 }

@@ -1,0 +1,257 @@
+﻿@{
+    Layout = null;
+    var cliente    = ViewBag.Cliente    as SistemaAcademia.Models.ClienteMatriculaViewModel;
+    var pagamentos = ViewBag.Pagamentos as IEnumerable<SistemaAcademia.Models.PagamentoListaViewModel> ?? Enumerable.Empty<SistemaAcademia.Models.PagamentoListaViewModel>();
+    var metodos    = ViewBag.Metodos    as IEnumerable<SistemaAcademia.Models.MetodoPagamentoViewModel> ?? Enumerable.Empty<SistemaAcademia.Models.MetodoPagamentoViewModel>();
+    bool podeRegistrar = ViewBag.PodeRegistrar == true;
+    string FormatCpf(string cpf) => cpf?.Length == 11 ? $"{cpf[..3]}.{cpf[3..6]}.{cpf[6..9]}-{cpf[9..]}" : cpf ?? "";
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pagamentos · FitManager</title>
+  <style>
+    :root {
+      --fundo: oklch(99% 0.002 240); --superficie: oklch(100% 0 0);
+      --texto: oklch(18% 0.012 250); --texto-muted: oklch(54% 0.012 250);
+      --borda: oklch(92% 0.005 250); --destaque: oklch(82% 0.18 145);
+      --destaque-suave: color-mix(in oklch, var(--destaque) 14%, transparent);
+      --fonte-corpo: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --fonte-mono: ui-monospace, 'JetBrains Mono', monospace;
+      --raio: 10px; --raio-lg: 16px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--fundo); color: var(--texto); font-family: var(--fonte-corpo); }
+
+    .topbar { background: var(--superficie); border-bottom: 1px solid var(--borda); padding: 14px 40px; display: flex; align-items: center; gap: 16px; }
+    .topbar-logo { font-family: 'Iowan Old Style', Georgia, serif; font-size: 18px; font-weight: 600; }
+    .topbar-sep { color: var(--borda); }
+    .topbar-titulo { font-size: 15px; font-weight: 600; flex-grow: 1; }
+    .topbar-usuario { font-size: 13px; color: var(--texto-muted); }
+    .topbar-voltar { font-size: 13px; color: var(--texto-muted); text-decoration: none; }
+    .topbar-voltar:hover { color: var(--texto); }
+
+    .conteudo { max-width: 1000px; margin: 0 auto; padding: 40px; }
+
+    .aluno-cabecalho { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .aluno-nome { font-size: 20px; font-weight: 700; margin: 0 0 4px; }
+    .aluno-cpf  { font-size: 13px; color: var(--texto-muted); font-family: var(--fonte-mono); margin: 0; }
+
+    .cartao { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-lg); padding: 28px; margin-bottom: 20px; }
+
+    .tabela { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .tabela th, .tabela td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--borda); }
+    .tabela th { color: var(--texto-muted); font-weight: 500; font-family: var(--fonte-mono); font-size: 11px; text-transform: uppercase; }
+    .tabela tr:last-child td { border-bottom: none; }
+    .tabela tbody tr:hover { background: var(--fundo); }
+
+    .etiqueta { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .et-pago     { background: #DCFCE7; color: #166534; }
+    .et-pendente { background: #FEF9C3; color: #854D0E; }
+    .et-atrasado { background: #FEE2E2; color: #991B1B; }
+    .et-cancelado{ background: #F3F4F6; color: #6B7280; }
+
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie); color: var(--texto); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; font-family: inherit; transition: background 0.15s; }
+    .btn:hover { background: var(--fundo); }
+    .btn-primario { background: var(--destaque); border-color: var(--destaque); }
+    .btn-primario:hover { background: color-mix(in oklch, var(--destaque) 85%, white); }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+    .btn-destaque { color: oklch(30% 0.1 145); border-color: color-mix(in oklch, var(--destaque) 50%, transparent); }
+    .btn-destaque:hover { background: var(--destaque-suave); }
+
+    .alerta { border-radius: var(--raio); padding: 12px 16px; font-size: 14px; margin-bottom: 20px; }
+    .alerta-sucesso { background: var(--destaque-suave); border: 1px solid color-mix(in oklch, var(--destaque) 30%, transparent); color: oklch(30% 0.1 145); }
+    .alerta-erro    { background: oklch(97% 0.02 15); border: 1px solid oklch(85% 0.08 15); color: oklch(35% 0.15 15); }
+
+    .vazio { text-align: center; padding: 60px; color: var(--texto-muted); font-size: 15px; }
+
+    dialog { border: 1px solid var(--borda); border-radius: var(--raio-lg); padding: 28px; max-width: 440px; width: 100%; }
+    dialog::backdrop { background: oklch(0% 0 0 / 40%); }
+    .dialog-titulo { font-size: 16px; font-weight: 700; margin: 0 0 6px; }
+    .dialog-sub    { font-size: 13px; color: var(--texto-muted); margin: 0 0 24px; }
+    .rotulo { font-size: 12px; font-weight: 600; color: var(--texto-muted); margin-bottom: 6px; }
+    .campo  { width: 100%; padding: 10px 14px; border: 1px solid var(--borda); border-radius: var(--raio); font-size: 14px; font-family: inherit; background: var(--fundo); }
+    .campo:focus { outline: none; border-color: var(--destaque); }
+    .grupo { margin-bottom: 16px; }
+    .dialog-acoes { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+
+    .resumo-bar { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; }
+    .resumo-item { flex: 1; min-width: 140px; background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); padding: 16px 20px; }
+    .resumo-valor { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
+    .resumo-label { font-size: 12px; color: var(--texto-muted); font-family: var(--fonte-mono); text-transform: uppercase; }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="topbar-logo" asp-controller="Home" asp-action="Index" style="text-decoration:none;color:inherit;">FitManager</a>
+  <span class="topbar-sep">·</span>
+  <span class="topbar-titulo">Pagamentos</span>
+  <span class="topbar-usuario">@ViewData["Nome"]</span>
+  <a asp-controller="Matricula" asp-action="Listar" asp-route-idCliente="@cliente?.IdCliente" class="topbar-voltar">← Matrículas</a>
+</header>
+
+<main class="conteudo">
+
+  @if (TempData["SucessoPagamento"] != null)
+  { <div class="alerta alerta-sucesso">@TempData["SucessoPagamento"]</div> }
+  @if (TempData["ErroPagamento"] != null)
+  { <div class="alerta alerta-erro">@TempData["ErroPagamento"]</div> }
+
+  <div class="aluno-cabecalho">
+    <div>
+      <p class="aluno-nome">@cliente?.NomeCliente</p>
+      <p class="aluno-cpf">@FormatCpf(cliente?.CPF ?? "")</p>
+    </div>
+  </div>
+
+  @{
+    var ativos    = pagamentos.Where(p => p.Status != "Cancelado").ToList();
+    var totalPago = ativos.Where(p => p.Status == "Pago").Sum(p => p.ValorPago);
+    var totalPendente = ativos.Where(p => p.Status is "Pendente" or "Atrasado").Sum(p => p.ValorEsperado);
+    var totalAtrasado = ativos.Where(p => p.Status == "Atrasado").Sum(p => p.ValorEsperado);
+  }
+
+  <div class="resumo-bar">
+    <div class="resumo-item">
+      <p class="resumo-valor">R$ @totalPago.ToString("N2")</p>
+      <p class="resumo-label">Total pago</p>
+    </div>
+    <div class="resumo-item">
+      <p class="resumo-valor">R$ @totalPendente.ToString("N2")</p>
+      <p class="resumo-label">Em aberto</p>
+    </div>
+    @if (totalAtrasado > 0)
+    {
+      <div class="resumo-item" style="border-color: oklch(85% 0.08 15);">
+        <p class="resumo-valor" style="color: oklch(45% 0.18 15);">R$ @totalAtrasado.ToString("N2")</p>
+        <p class="resumo-label">Atrasado</p>
+      </div>
+    }
+  </div>
+
+  <div class="cartao">
+    @if (!pagamentos.Any())
+    {
+      <div class="vazio">Nenhuma parcela encontrada.</div>
+    }
+    else
+    {
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th>Vencimento</th>
+            <th>Modalidade / Plano</th>
+            <th>Valor</th>
+            <th>Status</th>
+            <th>Pgto</th>
+            @if (podeRegistrar) { <th></th> }
+          </tr>
+        </thead>
+        <tbody>
+          @foreach (var p in pagamentos)
+          {
+            <tr>
+              <td style="font-family: var(--fonte-mono); font-size: 13px;">@p.DataVencimento.ToString("dd/MM/yyyy")</td>
+              <td>
+                <strong>@p.NomeModalidade</strong>
+                <span style="color: var(--texto-muted); font-size: 12px;"> · @p.NomePlano</span>
+              </td>
+              <td style="font-family: var(--fonte-mono);">
+                @if (p.Status == "Pago" && p.ValorPago != p.ValorEsperado)
+                {
+                  <span title="Esperado: R$ @p.ValorEsperado.ToString("N2")">R$ @p.ValorPago.ToString("N2") *</span>
+                }
+                else
+                {
+                  <span>R$ @p.ValorEsperado.ToString("N2")</span>
+                }
+              </td>
+              <td>
+                @switch (p.Status)
+                {
+                  case "Pago":
+                    <span class="etiqueta et-pago">Pago</span>
+                    break;
+                  case "Pendente":
+                    <span class="etiqueta et-pendente">Pendente</span>
+                    break;
+                  case "Atrasado":
+                    <span class="etiqueta et-atrasado">Atrasado</span>
+                    break;
+                  default:
+                    <span class="etiqueta et-cancelado">Cancelado</span>
+                    break;
+                }
+              </td>
+              <td style="font-size: 12px; color: var(--texto-muted);">
+                @if (p.DataPagamento.HasValue)
+                {
+                  <span>@p.DataPagamento.Value.ToString("dd/MM/yy")</span><br />
+                  <span>@p.MetodoPagamento</span>
+                }
+              </td>
+              @if (podeRegistrar)
+              {
+                <td>
+                  @if (p.Status is "Pendente" or "Atrasado")
+                  {
+                    <button class="btn btn-sm btn-destaque"
+                      onclick="abrirPagamento(@p.Id, @p.ValorEsperado.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture), '@p.DataVencimento.ToString("dd/MM/yyyy")', @cliente?.IdCliente)">
+                      Registrar
+                    </button>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+</main>
+
+<dialog id="dialogPagamento">
+  <p class="dialog-titulo">Registrar Pagamento</p>
+  <p class="dialog-sub" id="dlgSub"></p>
+  <form method="post" asp-action="Registrar">
+    <input type="hidden" id="dlgIdPagamento" name="IdPagamento" />
+    <input type="hidden" id="dlgIdCliente"   name="IdCliente" />
+
+    <div class="grupo">
+      <div class="rotulo">Forma de pagamento</div>
+      <select class="campo" name="IdMetodoPagamento" required>
+        @foreach (var m in metodos)
+        {
+          <option value="@m.Id">@m.Nome</option>
+        }
+      </select>
+    </div>
+
+    <div class="grupo">
+      <div class="rotulo">Valor recebido (R$)</div>
+      <input class="campo" id="dlgValor" name="ValorPago" type="number" min="0.01" step="0.01" required />
+    </div>
+
+    <div class="dialog-acoes">
+      <button type="button" class="btn" onclick="document.getElementById('dialogPagamento').close()">Cancelar</button>
+      <button type="submit" class="btn btn-primario">Confirmar</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  function abrirPagamento(idPagamento, valor, vencimento, idCliente) {
+    document.getElementById('dlgIdPagamento').value = idPagamento;
+    document.getElementById('dlgIdCliente').value   = idCliente;
+    document.getElementById('dlgValor').value       = valor;
+    document.getElementById('dlgSub').textContent   = 'Vencimento: ' + vencimento;
+    document.getElementById('dialogPagamento').showModal();
+  }
+</script>
+
+</body>
+</html>

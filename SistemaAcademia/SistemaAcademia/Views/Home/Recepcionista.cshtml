@@ -16,15 +16,7 @@
             <div style="font-size:2rem">👤</div>
             <h6 class="mt-2 fw-bold">Clientes</h6>
             <p class="text-muted small">Cadastrar e editar clientes</p>
-            <a href="#" class="btn btn-sm btn-success">Acessar</a>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm text-center p-3">
-            <div style="font-size:2rem">💳</div>
-            <h6 class="mt-2 fw-bold">Mensalidades</h6>
-            <p class="text-muted small">Registrar e consultar pagamentos</p>
-            <a href="#" class="btn btn-sm btn-success">Acessar</a>
+            <a asp-controller="Cliente" asp-action="Listar" class="btn btn-sm btn-success">Acessar</a>
         </div>
     </div>
     <div class="col-md-4">
@@ -32,7 +24,7 @@
             <div style="font-size:2rem">📋</div>
             <h6 class="mt-2 fw-bold">Check-in</h6>
             <p class="text-muted small">Controle de entrada de alunos</p>
-            <a href="#" class="btn btn-sm btn-success">Acessar</a>
+            <a asp-controller="CheckIn" asp-action="Scanner" class="btn btn-sm btn-success">Acessar</a>
         </div>
     </div>
 </div>

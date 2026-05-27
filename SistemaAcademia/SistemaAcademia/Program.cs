@@ -17,7 +17,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthorization();
 
@@ -30,4 +31,7 @@ app.MapControllerRoute(
     pattern: "{controller=Login}/{action=Index}/{id?}")
     .WithStaticAssets();
 
-app.Run();
+if (Environment.GetEnvironmentVariable("PORT") is string port)
+    app.Run($"http://0.0.0.0:{port}");
+else
+    app.Run();

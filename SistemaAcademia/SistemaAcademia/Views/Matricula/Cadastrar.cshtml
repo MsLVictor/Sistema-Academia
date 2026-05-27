@@ -1,0 +1,194 @@
+﻿@{
+    Layout = null;
+    var cliente     = ViewBag.Cliente     as SistemaAcademia.Models.ClienteMatriculaViewModel;
+    var planos      = ViewBag.Planos      as IEnumerable<SistemaAcademia.Models.PlanoViewModel>      ?? Enumerable.Empty<SistemaAcademia.Models.PlanoViewModel>();
+    var modalidades = ViewBag.Modalidades as IEnumerable<SistemaAcademia.Models.ModalidadeViewModel> ?? Enumerable.Empty<SistemaAcademia.Models.ModalidadeViewModel>();
+    var metodos     = ViewBag.Metodos     as IEnumerable<SistemaAcademia.Models.MetodoPagamentoViewModel> ?? Enumerable.Empty<SistemaAcademia.Models.MetodoPagamentoViewModel>();
+    string FormatCpf(string cpf) => cpf?.Length == 11 ? $"{cpf[..3]}.{cpf[3..6]}.{cpf[6..9]}-{cpf[9..]}" : cpf ?? "";
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nova Matrícula · FitManager</title>
+  <style>
+    :root {
+      --fundo: oklch(99% 0.002 240); --superficie: oklch(100% 0 0);
+      --texto: oklch(18% 0.012 250); --texto-muted: oklch(54% 0.012 250);
+      --borda: oklch(92% 0.005 250); --destaque: oklch(82% 0.18 145);
+      --destaque-suave: color-mix(in oklch, var(--destaque) 14%, transparent);
+      --fonte-corpo: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --fonte-mono: ui-monospace, 'JetBrains Mono', monospace;
+      --raio: 10px; --raio-lg: 16px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--fundo); color: var(--texto); font-family: var(--fonte-corpo); }
+    .topbar { background: var(--superficie); border-bottom: 1px solid var(--borda); padding: 14px 40px; display: flex; align-items: center; gap: 16px; }
+    .topbar-logo { font-family: 'Iowan Old Style', Georgia, serif; font-size: 18px; font-weight: 600; }
+    .topbar-sep { color: var(--borda); }
+    .topbar-titulo { font-size: 15px; font-weight: 600; flex-grow: 1; }
+    .topbar-usuario { font-size: 13px; color: var(--texto-muted); }
+    .topbar-voltar { font-size: 13px; color: var(--texto-muted); text-decoration: none; }
+    .topbar-voltar:hover { color: var(--texto); }
+    .conteudo { max-width: 680px; margin: 0 auto; padding: 40px; }
+    .cartao { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio-lg); padding: 32px; margin-bottom: 20px; }
+    .aluno-info { background: var(--destaque-suave); border: 1px solid color-mix(in oklch, var(--destaque) 30%, transparent); border-radius: var(--raio); padding: 16px 20px; margin-bottom: 28px; }
+    .aluno-nome { font-size: 18px; font-weight: 700; margin: 0 0 4px; }
+    .aluno-cpf { font-size: 13px; color: var(--texto-muted); font-family: var(--fonte-mono); margin: 0; }
+    .grupo { margin-bottom: 20px; }
+    .rotulo { font-size: 12px; font-weight: 600; color: var(--texto-muted); margin-bottom: 6px; }
+    .campo { width: 100%; padding: 10px 14px; border: 1px solid var(--borda); border-radius: var(--raio); font-size: 14px; font-family: inherit; background: var(--superficie); }
+    .campo:focus { outline: none; border-color: var(--destaque); }
+    .previa { background: var(--fundo); border: 1px solid var(--borda); border-radius: var(--raio); padding: 16px 20px; margin-top: 20px; font-size: 14px; display: none; }
+    .previa-linha { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .previa-linha:last-child { margin-bottom: 0; font-weight: 700; }
+    .previa-titulo { font-size: 12px; font-weight: 600; color: var(--texto-muted); margin-bottom: 12px; font-family: var(--fonte-mono); text-transform: uppercase; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie); color: var(--texto); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; font-family: inherit; }
+    .btn-primario { background: var(--destaque); border-color: var(--destaque); width: 100%; justify-content: center; padding: 14px; font-size: 15px; margin-top: 24px; }
+    .btn-primario:hover { background: color-mix(in oklch, var(--destaque) 85%, white); }
+    .alerta { border-radius: var(--raio); padding: 12px 16px; font-size: 14px; margin-bottom: 20px; }
+    .alerta-erro { background: oklch(97% 0.02 15); border: 1px solid oklch(85% 0.08 15); color: oklch(35% 0.15 15); }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="topbar-logo" asp-controller="Home" asp-action="Index" style="text-decoration:none;color:inherit;">FitManager</a>
+  <span class="topbar-sep">·</span>
+  <span class="topbar-titulo">Nova Matrícula</span>
+  <span class="topbar-usuario">@ViewData["Nome"]</span>
+  <a asp-controller="Matricula" asp-action="Listar" asp-route-idCliente="@cliente?.IdCliente" class="topbar-voltar">← Matrículas</a>
+</header>
+
+<main class="conteudo">
+
+  @if (TempData["ErroMatricula"] != null)
+  { <div class="alerta alerta-erro">@TempData["ErroMatricula"]</div> }
+
+  <div class="cartao">
+
+    <div class="aluno-info">
+      <p class="aluno-nome">@cliente?.NomeCliente</p>
+      <p class="aluno-cpf">@FormatCpf(cliente?.CPF ?? "")</p>
+    </div>
+
+    <form method="post" id="formMatricula">
+      <input type="hidden" name="IdCliente" value="@cliente?.IdCliente" />
+
+      <div class="grupo">
+        <div class="rotulo">Modalidade</div>
+        <select class="campo" name="IdModalidade" id="selModalidade" required onchange="atualizarPrevia()">
+          <option value="">Selecione uma modalidade</option>
+          @foreach (var m in modalidades)
+          {
+            <option value="@m.Id" data-valor="@m.ValorModalidade.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)">
+              @m.Nome — R$ @m.ValorModalidade.ToString("N2")
+            </option>
+          }
+        </select>
+      </div>
+
+      <div class="grupo">
+        <div class="rotulo">Plano</div>
+        <select class="campo" name="IdPlano" id="selPlano" required onchange="atualizarPrevia()">
+          <option value="">Selecione um plano</option>
+          @foreach (var p in planos)
+          {
+            <option value="@p.Id"
+              data-meses="@int.Parse(p.TempoPlano)"
+              data-desconto="@p.PercentualDesconto.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)">
+              @p.Nome — @int.Parse(p.TempoPlano) @(int.Parse(p.TempoPlano) == 1 ? "mês" : "meses") (@p.PercentualDesconto.ToString("0.##")% desc.)
+            </option>
+          }
+        </select>
+      </div>
+
+      <div class="grupo">
+        <div class="rotulo">Data de início</div>
+        <input class="campo" type="date" name="DataInicio"
+          value="@DateTime.Today.ToString("yyyy-MM-dd")" required onchange="atualizarPrevia()" id="dataInicio" />
+      </div>
+
+      <div class="previa" id="previa">
+        <div class="previa-titulo">Resumo da matrícula</div>
+        <div class="previa-linha"><span>Valor da modalidade</span><span id="pvValorBase">—</span></div>
+        <div class="previa-linha"><span>Desconto do plano</span><span id="pvDesconto">—</span></div>
+        <div class="previa-linha"><span>Parcela mensal</span><span id="pvParcela">—</span></div>
+        <div class="previa-linha"><span>Número de parcelas</span><span id="pvMeses">—</span></div>
+        <div class="previa-linha"><span>Primeira parcela</span><span id="pvPrimeiro">—</span></div>
+        <div class="previa-linha"><span>Última parcela</span><span id="pvUltimo">—</span></div>
+      </div>
+
+      <div style="margin-top: 20px; padding: 16px 20px; background: var(--fundo); border: 1px solid var(--borda); border-radius: var(--raio);">
+        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; font-size: 14px;">
+          <input type="checkbox" name="PrimeiroPagoNoAto" id="chkPrimeiroPago" value="true"
+            style="width: 16px; height: 16px; accent-color: var(--destaque);"
+            onchange="toggleMetodoPagamento(this.checked)" />
+          Primeiro mês pago no ato
+        </label>
+        <div id="secaoMetodo" style="display: none; margin-top: 14px;">
+          <div class="rotulo">Forma de pagamento</div>
+          <select class="campo" name="IdMetodoPagamentoPrimeiro" id="selMetodo">
+            <option value="">Selecione</option>
+            @foreach (var m in metodos)
+            {
+              <option value="@m.Id">@m.Nome</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primario">Confirmar Matrícula</button>
+    </form>
+
+  </div>
+</main>
+
+<script>
+  function toggleMetodoPagamento(checked) {
+    const secao = document.getElementById('secaoMetodo');
+    const sel   = document.getElementById('selMetodo');
+    secao.style.display = checked ? 'block' : 'none';
+    sel.required = checked;
+  }
+
+  function atualizarPrevia() {
+    const selMod   = document.getElementById('selModalidade');
+    const selPlano = document.getElementById('selPlano');
+    const dataInput = document.getElementById('dataInicio');
+    const previa   = document.getElementById('previa');
+
+    const optMod   = selMod.options[selMod.selectedIndex];
+    const optPlano = selPlano.options[selPlano.selectedIndex];
+
+    if (!selMod.value || !selPlano.value || !dataInput.value) {
+      previa.style.display = 'none';
+      return;
+    }
+
+    const valorBase = parseFloat(optMod.dataset.valor);
+    const desconto  = parseFloat(optPlano.dataset.desconto);
+    const meses     = parseInt(optPlano.dataset.meses);
+    const parcela   = valorBase * (1 - desconto / 100);
+
+    const dataInicio = new Date(dataInput.value + 'T00:00:00');
+    const dataFim    = new Date(dataInicio);
+    dataFim.setMonth(dataFim.getMonth() + meses - 1);
+
+    const fmt = d => d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    const brl = v => 'R$ ' + v.toFixed(2).replace('.', ',');
+
+    document.getElementById('pvValorBase').textContent = brl(valorBase);
+    document.getElementById('pvDesconto').textContent  = desconto > 0 ? '-' + desconto.toFixed(2).replace('.', ',') + '%' : 'Sem desconto';
+    document.getElementById('pvParcela').textContent   = brl(parcela);
+    document.getElementById('pvMeses').textContent     = meses + ' ' + (meses === 1 ? 'parcela' : 'parcelas');
+    document.getElementById('pvPrimeiro').textContent  = fmt(dataInicio);
+    document.getElementById('pvUltimo').textContent    = fmt(dataFim);
+
+    previa.style.display = 'block';
+  }
+</script>
+
+</body>
+</html>

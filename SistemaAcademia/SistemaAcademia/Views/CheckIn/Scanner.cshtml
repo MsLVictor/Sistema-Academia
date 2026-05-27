@@ -1,0 +1,330 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Check-in · FitManager</title>
+  <style>
+    :root {
+      --fundo:          oklch(99% 0.002 240);
+      --superficie:     oklch(100% 0 0);
+      --texto:          oklch(18% 0.012 250);
+      --texto-muted:    oklch(54% 0.012 250);
+      --borda:          oklch(92% 0.005 250);
+      --destaque:       oklch(82% 0.18 145);
+      --destaque-suave: color-mix(in oklch, var(--destaque) 14%, transparent);
+      --fonte-titulo: 'Iowan Old Style', 'Charter', Georgia, serif;
+      --fonte-corpo:  -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --fonte-mono:   ui-monospace, 'JetBrains Mono', monospace;
+      --raio: 10px; --raio-lg: 16px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--fundo);
+      color: var(--texto);
+      font-family: var(--fonte-corpo);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      background: var(--superficie);
+      border-bottom: 1px solid var(--borda);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .topbar-logo  { font-family: var(--fonte-titulo); font-size: 18px; font-weight: 600; }
+    .topbar-sep   { color: var(--borda); user-select: none; }
+    .topbar-titulo { font-size: 15px; font-weight: 600; flex-grow: 1; }
+    .topbar-usuario { font-size: 13px; color: var(--texto-muted); }
+    .topbar-voltar  { font-size: 13px; color: var(--texto-muted); text-decoration: none; }
+    .topbar-voltar:hover { color: var(--texto); }
+
+    .conteudo {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      gap: 24px;
+    }
+
+    .cartao {
+      background: var(--superficie);
+      border: 1px solid var(--borda);
+      border-radius: var(--raio-lg);
+      padding: 40px 32px;
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .cartao-titulo {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0 0 6px;
+      text-align: center;
+    }
+    .cartao-sub {
+      font-size: 14px;
+      color: var(--texto-muted);
+      text-align: center;
+      margin: 0 0 32px;
+    }
+
+    .campo-cpf {
+      width: 100%;
+      padding: 18px 20px;
+      font-size: 28px;
+      font-family: var(--fonte-mono);
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-align: center;
+      border: 2px solid var(--borda);
+      border-radius: var(--raio-lg);
+      background: var(--fundo);
+      color: var(--texto);
+      outline: none;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+    .campo-cpf::placeholder {
+      color: var(--texto-muted);
+      font-size: 20px;
+      letter-spacing: 1px;
+      font-weight: 400;
+    }
+    .campo-cpf:focus { border-color: var(--destaque); }
+
+    .btn-confirmar {
+      display: block;
+      width: 100%;
+      margin-top: 16px;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: inherit;
+      border: none;
+      border-radius: var(--raio-lg);
+      background: var(--destaque);
+      color: oklch(15% 0.06 145);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-confirmar:hover { background: color-mix(in oklch, var(--destaque) 85%, white); }
+    .btn-confirmar:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .resultado {
+      width: 100%;
+      max-width: 440px;
+      border-radius: var(--raio-lg);
+      padding: 24px 28px;
+      display: none;
+      animation: entrar 0.2s ease;
+    }
+    .resultado.entrada {
+      background: var(--destaque-suave);
+      border: 1px solid color-mix(in oklch, var(--destaque) 35%, transparent);
+    }
+    .resultado.saida {
+      background: oklch(97% 0.04 70);
+      border: 1px solid oklch(85% 0.1 70);
+    }
+    .resultado.erro {
+      background: oklch(97% 0.02 15);
+      border: 1px solid oklch(85% 0.08 15);
+    }
+
+    .resultado-icone { font-size: 40px; text-align: center; margin-bottom: 12px; }
+
+    .resultado-tipo {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-align: center;
+      margin: 0 0 4px;
+    }
+    .resultado.entrada .resultado-tipo { color: oklch(38% 0.1 145); }
+    .resultado.saida   .resultado-tipo { color: oklch(42% 0.12 70); }
+
+    .resultado-nome {
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+      margin: 0 0 6px;
+    }
+    .resultado.entrada .resultado-nome { color: oklch(28% 0.1 145); }
+    .resultado.saida   .resultado-nome { color: oklch(30% 0.12 70); }
+    .resultado.erro    .resultado-nome { color: oklch(35% 0.15 15); }
+
+    .resultado-detalhe {
+      font-size: 14px;
+      text-align: center;
+      margin: 0;
+    }
+    .resultado.entrada .resultado-detalhe { color: oklch(38% 0.1 145); }
+    .resultado.saida   .resultado-detalhe { color: oklch(42% 0.12 70); }
+    .resultado.erro    .resultado-detalhe { color: oklch(45% 0.12 15); }
+
+    .progresso-barra {
+      height: 3px;
+      border-radius: 999px;
+      margin-top: 16px;
+      width: 100%;
+      transform-origin: left;
+      display: none;
+    }
+    .resultado.entrada .progresso-barra { background: var(--destaque); }
+    .resultado.saida   .progresso-barra { background: oklch(65% 0.18 70); }
+    .resultado.erro    .progresso-barra { background: oklch(65% 0.18 15); }
+
+    @@keyframes entrar {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @@keyframes recolher {
+      0%   { transform: scaleX(1); }
+      100% { transform: scaleX(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <a class="topbar-logo" asp-controller="Home" asp-action="Index" style="text-decoration:none;color:inherit;">FitManager</a>
+    <span class="topbar-sep">·</span>
+    <span class="topbar-titulo">Check-in</span>
+    <span class="topbar-usuario">@ViewData["Nome"]</span>
+    <a href="javascript:history.back()" class="topbar-voltar">← Painel</a>
+  </header>
+
+  <main class="conteudo">
+
+    <div class="cartao">
+      <h1 class="cartao-titulo">Check-in / Check-out</h1>
+      <p class="cartao-sub">Digite o CPF — entrada ou saída são registradas automaticamente</p>
+
+      <input
+        id="campoCpf"
+        type="tel"
+        inputmode="numeric"
+        class="campo-cpf"
+        placeholder="000.000.000-00"
+        maxlength="14"
+        autocomplete="off"
+        autofocus
+      />
+
+      <button id="btnConfirmar" class="btn-confirmar" disabled>Confirmar</button>
+    </div>
+
+    <div id="resultado" class="resultado">
+      <div class="resultado-icone"  id="resultadoIcone"></div>
+      <p  class="resultado-tipo"   id="resultadoTipo"></p>
+      <p  class="resultado-nome"   id="resultadoNome"></p>
+      <p  class="resultado-detalhe" id="resultadoDetalhe"></p>
+      <div class="progresso-barra" id="progressoBarra"></div>
+    </div>
+
+  </main>
+
+  <script>
+    const campoCpf    = document.getElementById('campoCpf');
+    const btnConfirmar = document.getElementById('btnConfirmar');
+    const resultado   = document.getElementById('resultado');
+    const icone       = document.getElementById('resultadoIcone');
+    const tipo        = document.getElementById('resultadoTipo');
+    const nome        = document.getElementById('resultadoNome');
+    const detalhe     = document.getElementById('resultadoDetalhe');
+    const barra       = document.getElementById('progressoBarra');
+
+    let timeoutLimpar = null;
+
+    function mascaraCpf(valor) {
+      const d = valor.replace(/\D/g, '').slice(0, 11);
+      if (d.length <= 3)  return d;
+      if (d.length <= 6)  return d.slice(0,3) + '.' + d.slice(3);
+      if (d.length <= 9)  return d.slice(0,3) + '.' + d.slice(3,6) + '.' + d.slice(6);
+      return d.slice(0,3) + '.' + d.slice(3,6) + '.' + d.slice(6,9) + '-' + d.slice(9);
+    }
+
+    campoCpf.addEventListener('input', () => {
+      const cursor = campoCpf.selectionStart;
+      campoCpf.value = mascaraCpf(campoCpf.value);
+      const digitos = campoCpf.value.replace(/\D/g, '').length;
+      btnConfirmar.disabled = digitos !== 11;
+    });
+
+    campoCpf.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !btnConfirmar.disabled) confirmarEntrada();
+    });
+
+    btnConfirmar.addEventListener('click', confirmarEntrada);
+
+    async function confirmarEntrada() {
+      const cpf = campoCpf.value;
+      btnConfirmar.disabled = true;
+      btnConfirmar.textContent = 'Verificando...';
+      esconderResultado();
+
+      try {
+        const resp = await fetch('@Url.Action("Entrada", "CheckIn")', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: 'cpf=' + encodeURIComponent(cpf)
+        });
+        const dados = await resp.json();
+        mostrarResultado(dados);
+      } catch {
+        mostrarResultado({ sucesso: false, mensagem: 'Erro de conexão. Tente novamente.' });
+      } finally {
+        btnConfirmar.textContent = 'Confirmar';
+      }
+    }
+
+    function mostrarResultado(dados) {
+      clearTimeout(timeoutLimpar);
+
+      let classe = 'erro';
+      if (dados.sucesso) classe = (dados.tipo === 'Saida') ? 'saida' : 'entrada';
+
+      resultado.className = 'resultado ' + classe;
+      icone.textContent   = dados.sucesso ? (dados.tipo === 'Saida' ? '↑' : '↓') : '✕';
+      tipo.textContent    = dados.sucesso ? (dados.tipo === 'Saida' ? 'Saída registrada' : 'Entrada registrada') : '';
+      nome.textContent    = dados.sucesso ? dados.nomeCliente : 'Acesso negado';
+      detalhe.textContent = dados.sucesso ? dados.hora : dados.mensagem;
+
+      resultado.style.display = 'block';
+      barra.style.display     = 'block';
+      barra.style.animation   = 'none';
+
+      // força reflow para reiniciar a animação
+      void barra.offsetWidth;
+      barra.style.animation = 'recolher 4s linear forwards';
+
+      timeoutLimpar = setTimeout(limpar, 4000);
+    }
+
+    function esconderResultado() {
+      resultado.style.display = 'none';
+      barra.style.display     = 'none';
+    }
+
+    function limpar() {
+      esconderResultado();
+      campoCpf.value       = '';
+      btnConfirmar.disabled = true;
+      campoCpf.focus();
+    }
+  </script>
+
+</body>
+</html>
