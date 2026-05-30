@@ -78,7 +78,7 @@
           </div>
           <div class="grupo-input">
             <label>Data de Nascimento <span class="req">*</span></label>
-            <input type="date" name="DataNascimento" required max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+            <input type="date" name="DataNascimento" required min="1900-01-01" max="@DateTime.Today.ToString("yyyy-MM-dd")" />
           </div>
           <div class="grupo-input span2">
             <label>Orientação Sexual <span class="req">*</span></label>
@@ -96,13 +96,9 @@
 
           <span class="secao-titulo">Acesso</span>
 
-          <div class="grupo-input">
-            <label>E-mail <span class="req">*</span></label>
-            <input type="email" name="Email" placeholder="aluno@email.com" required />
-          </div>
-          <div class="grupo-input">
-            <label>Senha <span class="req">*</span></label>
-            <input type="password" name="Senha" placeholder="Mínimo 6 caracteres" minlength="6" required />
+          <div class="grupo-input span2">
+            <label>E-mail <span style="color:var(--texto-muted);font-weight:400;">(opcional — o aluno receberá convite para definir a senha)</span></label>
+            <input type="email" name="Email" placeholder="aluno@email.com" />
           </div>
 
           <span class="secao-titulo">Contato</span>
@@ -163,54 +159,52 @@
         var planos      = ViewBag.Planos      as IEnumerable<SistemaAcademia.Models.PlanoViewModel>      ?? Enumerable.Empty<SistemaAcademia.Models.PlanoViewModel>();
         var metodos     = ViewBag.Metodos     as IEnumerable<SistemaAcademia.Models.MetodoPagamentoViewModel> ?? Enumerable.Empty<SistemaAcademia.Models.MetodoPagamentoViewModel>();
       }
-      @if (modalidades.Any() && planos.Any())
-      {
-        <div style="margin-bottom: 28px;">
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-            <input type="checkbox" id="chkMatricula" onchange="toggleMatricula(this.checked)"
-              style="width: 16px; height: 16px; accent-color: var(--destaque); cursor: pointer;" />
-            <label for="chkMatricula" style="font-weight: 700; font-size: 15px; cursor: pointer;">
-              Matricular agora
-            </label>
-          </div>
+      <div class="cartao" style="margin-bottom: 28px;">
+        <div class="grade">
+          <span class="secao-titulo">Matrícula <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></span>
 
-          <div id="secaoMatricula" style="display: none; background: var(--fundo); border: 1px solid var(--borda); border-radius: var(--raio); padding: 20px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr 180px; gap: 16px;">
-              <div>
-                <label style="font-size: 12px; font-weight: 600; color: var(--texto-muted); display: block; margin-bottom: 6px;">Modalidade</label>
-                <select name="IdModalidade" id="selModalidade" class="campo" onchange="calcularPrevia()">
-                  <option value="">Selecione</option>
-                  @foreach (var m in modalidades)
-                  {
-                    <option value="@m.Id" data-valor="@m.ValorModalidade.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)">
-                      @m.Nome — R$ @m.ValorModalidade.ToString("N2")
-                    </option>
-                  }
-                </select>
-              </div>
-              <div>
-                <label style="font-size: 12px; font-weight: 600; color: var(--texto-muted); display: block; margin-bottom: 6px;">Plano</label>
-                <select name="IdPlano" id="selPlano" class="campo" onchange="calcularPrevia()">
-                  <option value="">Selecione</option>
-                  @foreach (var p in planos)
-                  {
-                    <option value="@p.Id"
-                      data-meses="@int.Parse(p.TempoPlano)"
-                      data-desconto="@p.PercentualDesconto.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)">
-                      @p.Nome (@int.Parse(p.TempoPlano) @(int.Parse(p.TempoPlano) == 1 ? "mês" : "meses"), @p.PercentualDesconto.ToString("0.##")% desc.)
-                    </option>
-                  }
-                </select>
-              </div>
-              <div>
-                <label style="font-size: 12px; font-weight: 600; color: var(--texto-muted); display: block; margin-bottom: 6px;">Início</label>
-                <input type="date" name="DataInicioMatricula" id="dataInicio" class="campo"
-                  value="@DateTime.Today.ToString("yyyy-MM-dd")" onchange="calcularPrevia()" />
-              </div>
+          @if (!modalidades.Any() || !planos.Any())
+          {
+            <p class="span2" style="font-size:13px;color:var(--texto-muted);margin:0;">
+              Nenhuma modalidade ou plano cadastrado. Cadastre-os em <strong>Modalidades</strong> e <strong>Planos</strong> para matricular o aluno aqui.
+            </p>
+          }
+          else
+          {
+            <div>
+              <label style="font-size: 12px; font-weight: 600; color: var(--texto-muted); display: block; margin-bottom: 6px;">Modalidade</label>
+              <select name="IdModalidade" id="selModalidade" onchange="calcularPrevia()">
+                <option value="">Sem matrícula</option>
+                @foreach (var m in modalidades)
+                {
+                  <option value="@m.Id" data-valor="@m.ValorModalidade.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)">
+                    @m.Nome — R$ @m.ValorModalidade.ToString("N2")
+                  </option>
+                }
+              </select>
             </div>
-            <div id="previaMatricula" style="margin-top: 14px; font-size: 13px; color: var(--texto-muted);"></div>
+            <div>
+              <label style="font-size: 12px; font-weight: 600; color: var(--texto-muted); display: block; margin-bottom: 6px;">Plano</label>
+              <select name="IdPlano" id="selPlano" onchange="calcularPrevia()">
+                <option value="">—</option>
+                @foreach (var p in planos)
+                {
+                  <option value="@p.Id"
+                    data-meses="@int.Parse(p.TempoPlano)"
+                    data-desconto="@p.PercentualDesconto.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)">
+                    @p.Nome (@int.Parse(p.TempoPlano) @(int.Parse(p.TempoPlano) == 1 ? "mês" : "meses"), @p.PercentualDesconto.ToString("0.##")% desc.)
+                  </option>
+                }
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 12px; font-weight: 600; color: var(--texto-muted); display: block; margin-bottom: 6px;">Início</label>
+              <input type="date" name="DataInicioMatricula" id="dataInicio"
+                value="@DateTime.Today.ToString("yyyy-MM-dd")" onchange="calcularPrevia()" />
+            </div>
+            <div id="previaMatricula" class="span2" style="font-size: 13px; color: var(--texto-muted); min-height: 20px;"></div>
 
-            <div style="margin-top: 16px; padding: 14px 16px; background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio);">
+            <div class="span2" style="padding: 14px 16px; background: var(--fundo); border: 1px solid var(--borda); border-radius: var(--raio);">
               <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; font-size: 14px;">
                 <input type="checkbox" name="PrimeiroPagoNoAto" id="chkPrimeiroPagoCad" value="true"
                   style="width: 16px; height: 16px; accent-color: var(--destaque);"
@@ -219,7 +213,7 @@
               </label>
               <div id="secaoMetodoCad" style="display: none; margin-top: 12px;">
                 <label style="font-size: 12px; font-weight: 600; color: var(--texto-muted); display: block; margin-bottom: 6px;">Forma de pagamento</label>
-                <select name="IdMetodoPagamentoPrimeiro" id="selMetodoCad" class="campo" style="width: 100%; padding: 10px 14px; border: 1px solid var(--borda); border-radius: var(--raio); font-size: 14px; font-family: inherit; background: var(--superficie);">
+                <select name="IdMetodoPagamentoPrimeiro" id="selMetodoCad" style="width: 100%; padding: 10px 14px; border: 1px solid var(--borda); border-radius: var(--raio); font-size: 14px; font-family: inherit; background: var(--superficie);">
                   <option value="">Selecione</option>
                   @foreach (var m in metodos)
                   {
@@ -228,9 +222,9 @@
                 </select>
               </div>
             </div>
-          </div>
+          }
         </div>
-      }
+      </div>
 
       <div style="display: flex; gap: 12px; align-items: center;">
         <button type="submit" class="btn btn-primario">Cadastrar Aluno</button>
@@ -246,14 +240,6 @@
       const sel   = document.getElementById('selMetodoCad');
       secao.style.display = checked ? 'block' : 'none';
       sel.required = checked;
-    }
-
-    function toggleMatricula(checked) {
-      const secao = document.getElementById('secaoMatricula');
-      secao.style.display = checked ? 'block' : 'none';
-      secao.querySelectorAll('select.campo, input.campo').forEach(el => {
-        el.required = checked;
-      });
     }
 
     function calcularPrevia() {

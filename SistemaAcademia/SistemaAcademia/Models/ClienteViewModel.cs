@@ -5,8 +5,7 @@ public class CadastroClienteViewModel
     public string Nome { get; set; } = string.Empty;
     public string CPF { get; set; } = string.Empty;
     public DateTime DataNascimento { get; set; }
-    public string Email { get; set; } = string.Empty;
-    public string Senha { get; set; } = string.Empty;
+    public string? Email { get; set; }
     public long IdOrientacaoSexual { get; set; }
     public string Telefone { get; set; } = string.Empty;
     public string TelefoneOpcional { get; set; } = string.Empty;

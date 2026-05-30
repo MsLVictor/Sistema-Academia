@@ -85,10 +85,9 @@ public class ClienteRepository
 
     public long Cadastrar(CadastroClienteViewModel dados, long idAcademia, long idUsuario)
     {
-        string cpf   = string.Concat(dados.CPF.Where(char.IsDigit));
-        string cep   = string.Concat(dados.CEP.Where(char.IsDigit));
-        string tel   = string.Concat(dados.Telefone.Where(char.IsDigit));
-        byte[] senha = SHA256.HashData(Encoding.UTF8.GetBytes(dados.Senha.Trim()));
+        string cpf = string.Concat(dados.CPF.Where(char.IsDigit));
+        string cep = string.Concat(dados.CEP.Where(char.IsDigit));
+        string tel = string.Concat(dados.Telefone.Where(char.IsDigit));
 
         using SqlConnection conexao = new(_connectionString);
         conexao.Open();
@@ -128,9 +127,9 @@ public class ClienteRepository
                 cmd.Parameters.AddWithValue("@idOrientacaoSexual", dados.IdOrientacaoSexual);
                 cmd.Parameters.AddWithValue("@nome",               dados.Nome);
                 cmd.Parameters.AddWithValue("@cpf",                cpf);
-                cmd.Parameters.AddWithValue("@dataNascimento",     dados.DataNascimento);
-                cmd.Parameters.AddWithValue("@email",              dados.Email.Trim());
-                cmd.Parameters.AddWithValue("@senha",              senha);
+                cmd.Parameters.Add("@dataNascimento", System.Data.SqlDbType.Date).Value = dados.DataNascimento;
+                cmd.Parameters.AddWithValue("@email", string.IsNullOrEmpty(dados.Email) ? DBNull.Value : (object)dados.Email.Trim());
+                cmd.Parameters.Add("@senha", System.Data.SqlDbType.VarBinary).Value = DBNull.Value;
                 idCliente = Convert.ToInt64(cmd.ExecuteScalar());
             }
 
@@ -225,7 +224,7 @@ public class ClienteRepository
             {
                 cmd.Parameters.AddWithValue("@nome",               dados.Nome);
                 cmd.Parameters.AddWithValue("@email",              dados.Email.Trim());
-                cmd.Parameters.AddWithValue("@dataNascimento",     dados.DataNascimento);
+                cmd.Parameters.Add("@dataNascimento", System.Data.SqlDbType.Date).Value = dados.DataNascimento;
                 cmd.Parameters.AddWithValue("@idOrientacaoSexual", dados.IdOrientacaoSexual);
                 cmd.Parameters.AddWithValue("@id",                 dados.Id);
                 cmd.Parameters.AddWithValue("@idAcademia",         idAcademia);
